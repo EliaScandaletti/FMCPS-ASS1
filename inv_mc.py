@@ -21,15 +21,53 @@ def check_explain_inv_spec(spec):
     otherwise.
 
     The execution is a tuple of alternating states and inputs, starting
-    and ennding with a state. States and inputs are represented by dictionaries
+    and ending with a state. States and inputs are represented by dictionaries
     where keys are state and inputs variable of the loaded SMV model, and values
     are their value.
+    
+    function SymbolicReachable(Init, Trans, Inv)
+        Reach ← Init
+        New ← Init
+        while not IsEmpty(New) do
+            if not IsEmpty(Intersect(New, Not(Inv))) then
+                return False
+            end if
+            New ← Diff(Post(New,Trans), Reach)
+            Reach ← Union(Reach, New)
+        end while
+        return True
+    end function
     """
 
-    model = pynusmv.glob.bdd_encoding()
-    invariant = spec_to_bdd(model, spec)
 
-    return res, trace
+    # a + b and a | b compute the disjunction of a and b
+    # a * b and a & b compute the conjunction of a and b
+    # ~a and -a compute the negation of a
+    # a - b computes a & ~b
+    # a ^ b computes the exclusive-OR (XOR) of a and b
+    # a == b, a <= b, a < b, a > b and a >= b compare a and b
+
+
+    model = pynusmv.glob.prop_database().master.bddFsm
+    invariant = spec_to_bdd(model, spec)
+    not_invarinat = ~invariant
+
+    reach = model.init
+    new = model.init
+    trace = []
+
+    while not new.is_false():
+        if new.intersected(not_invarinat):
+            # trace = ...
+            return False, trace
+        new = model.post(new) - reach
+        reach = reach + new
+    return True, None
+
+
+    # for state in model.pick_all_states(invariant):
+    #     print(state.get_str_values())
+
 
 if len(sys.argv) != 2:
     print("Usage:", sys.argv[0], "filename.smv")
