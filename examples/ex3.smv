@@ -1,0 +1,38 @@
+MODULE main
+    IVAR
+        move : {c, g, w, n};
+    VAR
+        cabbage : {right, left, eaten};
+        goat : {right, left, eaten};
+        wolf : {right, left};
+        farmer : {right, left};
+        
+    ASSIGN
+        init(cabbage) := left;
+        init(goat) := left;
+        init(wolf) := left;
+        init(farmer) := left;
+
+        next (farmer) := case
+            farmer = left : right;
+            farmer = right : left;
+        esac;
+
+        next(cabbage) := case
+            farmer != cabbage & cabbage = goat : eaten;
+            move = c & farmer = cabbage : next(farmer);
+            TRUE : cabbage;
+        esac;
+
+        next(goat) := case
+            farmer != goat & goat = wolf : eaten;
+            move = g & farmer = goat : next(farmer);
+            TRUE : goat;
+        esac;
+
+        next(wolf) := case
+            move = w & farmer = wolf : next(farmer);
+            TRUE : wolf;
+        esac;
+
+INVARSPEC !(cabbage = right & goat = right & wolf = right)
