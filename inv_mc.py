@@ -11,6 +11,20 @@ def spec_to_bdd(model, spec):
     return bddspec
 
 
+def create_trace_inputs(model: pynusmv.fsm.BddFsm, trace: List[pynusmv.dd.State]) -> tuple[dict, ...]:
+    prev = None
+    full_trace = []
+
+    for state in trace:
+        if prev is not None:
+            input = model.get_inputs_between_states(prev, state)
+            full_trace.append(model.pick_one_inputs(input).get_str_values())
+        full_trace.append(state.get_str_values())
+        prev = state
+
+    return tuple(full_trace)
+
+
 def create_trace(model: pynusmv.fsm.BddFsm, sym_trace: List[pynusmv.dd.BDD]) -> List[pynusmv.dd.State]:
     if len(sym_trace) == 0:
         return []
@@ -86,11 +100,9 @@ def check_explain_inv_spec(spec):
             # for s in model.pick_all_states(bdd):
             #     print(s.get_str_values())
             trace = create_trace(model, sym_trace)
-            
-            for state in trace:
-                print(state.get_str_values())
+            full_trace = create_trace_inputs(model, trace)
+            return False, full_trace
 
-            return False, trace
         new = model.post(new) - reach
         sym_trace.append(new)
         reach = reach + new
