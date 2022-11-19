@@ -34,12 +34,8 @@ def create_trace(model: pynusmv.fsm.BddFsm, sym_trace: List[pynusmv.dd.BDD]) -> 
 
     sym_target = sym_trace.pop()
     target = model.pick_one_state(sym_target)
-    # print(f'picked: {target.get_str_values()}')
 
     sym_trace[-1] = sym_trace[-1] & model.pre(target)
-    # if sym_trace[-1].is_false():
-    #     for s in model.pick_all_states(model.pre(target)):
-    #         print(s.get_str_values())
 
     trace = create_trace(model, sym_trace)
     trace.append(target)
@@ -95,10 +91,6 @@ def check_explain_inv_spec(spec):
     while not new.is_false():
         if new.intersected(not_invarinat):
             sym_trace[-1] = sym_trace[-1] & not_invarinat
-            # for bdd in sym_trace:
-            # print('---')
-            # for s in model.pick_all_states(bdd):
-            #     print(s.get_str_values())
             trace = create_trace(model, sym_trace)
             full_trace = create_trace_inputs(model, trace)
             return False, full_trace
@@ -107,9 +99,6 @@ def check_explain_inv_spec(spec):
         sym_trace.append(new)
         reach = reach + new
     return True, None
-
-    # for state in model.pick_all_states(invariant):
-    #     print(state.get_str_values())
 
 
 if len(sys.argv) != 2:
