@@ -26,7 +26,8 @@ def check_explain_inv_spec(spec):
     are their value.
     """
 
-    # Things...    
+    model = pynusmv.glob.bdd_encoding()
+    invariant = spec_to_bdd(model, spec)
 
     return res, trace
 
