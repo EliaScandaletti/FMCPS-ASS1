@@ -1,0 +1,79 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper, text={6.5in,9in}]{geometry}
+% \usepackage[utf8]{inputenc}
+% \usepackage{graphicx}
+% \graphicspath{ {immagini/} }
+
+% \usepackage{titling}
+
+% \usepackage{hyperref}
+% \hypersetup{
+%     colorlinks,
+%     citecolor=black,
+%     filecolor=black,
+%     linkcolor=black,
+%     urlcolor=black
+% }
+
+% \usepackage{fancyhdr}
+% \pagestyle{fancy}
+
+% \usepackage{amsmath}
+% \usepackage{dsfont}
+% \newcommand*{\Z}{\mathds{Z}}
+
+% %\usepackage{minted, xcolor}
+% %\usemintedstyle{monokai}
+% %\definecolor{bg}{HTML}{282828}
+% %\usepackage[defaultmono]{droidsansmono}
+% \usepackage[T1]{fontenc}
+
+% \pretitle{%
+%   \begin{center}
+%   \LARGE
+%   \includegraphics[width=6cm]{logo-unipd}\\[\bigskipamount]
+% }
+% \posttitle{\end{center}}
+
+\title{\textbf{Università di Padova \\ Formal Methods for Cyber-Physical Systems project report}}
+\author{Alberto Lazari - 1216747\\}
+\date{Giugno 2022 - A.A. 2021-2022}
+
+\renewcommand*\contentsname{Indice}
+
+\begin{document}
+	\maketitle
+	\pagebreak
+
+	\tableofcontents
+	\pagebreak
+
+    \section{Notazione}
+    \begin{description}
+        \item[$Post$]: funzione che rappresenta la regione di stati raggiungibili da una regione data applicando un solo passo di transizione.
+    \end{description}
+
+	\section{Come funziona?}
+	\subsection{Idea di base}
+						L'obiettivo di questo algoritmo è, dati una regione di stati iniziali $Init$, una funzione di transizione $Trans$ e un invariante $Inv$, decidere se $Inv$ è verificato in tutti gli stasti raggiungibili a partire da $Init$ applicando $Trans$.
+
+						L'idea per fare ciò è trovare una rappresentazione simbolica di tutti e soli gli stati raggiungibili dal sistema.
+						Così facendo risulta semplice verificare se in alcuni di questi stati l'invariante non è verificato.
+						È possibile utilizzare un'ottimizzazione per evitare di calcolare tutti gli stati nel caso in cui nel processo vengano trovati degli stati che non soddisfano l'invariante.
+
+		Per fare ciò, utilizziamo una variabile $Reach$ che rappresenta gli stati raggiungibili dal sistema e la aggiorniamo iterativamente.
+    L'idea di base è che all'iterazione $t$, $Reach$ rappresenta tutti gli stati raggiungibili a partire da $Init$ e applicando $Trans$ al più $t$ volte.
+    L'algoritmo si interrompe quando si verifica una delle due seguenti condizioni:
+    \begin{enumerate}
+        \item $Post(Reach) \subseteq Reach $: abbiamo trovato tutti i possibili stati raggiungibili;
+        \item $Reach \cap \neg Inv \neq \emptyset$: abbiamo trovato alcuni stati raggiungibili in cui non vale l'invariante.
+    \end{enumerate}
+
+	%TODO
+	\textbf{TODO Disegnino}
+
+	\subsection{Implementazione}
+    
+	\section{Perché funziona?}
+	Spiegazione formale
+\end{document}

@@ -1,0 +1,15 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
+\PYG{n}{function} \PYG{n}{IsInvariantRespected}\PYG{p}{(}\PYG{n}{Init}\PYG{p}{,} \PYG{n}{Trans}\PYG{p}{,} \PYG{n}{Inv}\PYG{p}{)}
+    \PYG{n}{Reach} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZhy{}} \PYG{n}{Init}
+    \PYG{n}{New} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZhy{}} \PYG{n}{Init}
+    \PYG{esc}{\lambda}
+    \PYG{k}{while} \PYG{o+ow}{not} \PYG{n}{IsEmpty}\PYG{p}{(}\PYG{n}{New}\PYG{p}{)} \PYG{n}{do}
+        \PYG{k}{if} \PYG{o+ow}{not} \PYG{n}{IsEmpty}\PYG{p}{(}\PYG{n}{Intersect}\PYG{p}{(}\PYG{n}{New}\PYG{p}{,} \PYG{n}{Not}\PYG{p}{(}\PYG{n}{Inv}\PYG{p}{)}\PYG{p}{)}\PYG{p}{)} \PYG{n}{then}
+            \PYG{k}{return} \PYG{k+kc}{False}
+        \PYG{n}{end} \PYG{k}{if}
+        \PYG{n}{New} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZhy{}} \PYG{n}{Diff}\PYG{p}{(}\PYG{n}{Post}\PYG{p}{(}\PYG{n}{New}\PYG{p}{,}\PYG{n}{Trans}\PYG{p}{)}\PYG{p}{,} \PYG{n}{Reach}\PYG{p}{)}
+        \PYG{n}{Reach} \PYG{o}{\PYGZlt{}}\PYG{o}{\PYGZhy{}} \PYG{n}{Union}\PYG{p}{(}\PYG{n}{Reach}\PYG{p}{,} \PYG{n}{New}\PYG{p}{)}
+    \PYG{n}{end} \PYG{k}{while}
+    \PYG{k}{return} \PYG{k+kc}{True}
+\PYG{n}{end} \PYG{n}{function}
+\end{Verbatim}

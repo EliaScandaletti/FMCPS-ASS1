@@ -1,0 +1,14 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{o}{\PYGZca{}\PYGZca{}}\PYG{n}{Ifunction}\PYG{+w}{ }\PYG{n}{SymbolicReachable}\PYG{p}{(}\PYG{n}{Init}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Trans}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Inv}\PYG{p}{)}
+\PYG{+w}{        }\PYG{n}{Reach}\PYG{+w}{ }\PYG{err}{←}\PYG{+w}{ }\PYG{n}{Init}
+\PYG{+w}{        }\PYG{n}{New}\PYG{+w}{ }\PYG{err}{←}\PYG{+w}{ }\PYG{n}{Init}
+\PYG{+w}{        }\PYG{k}{while}\PYG{+w}{ }\PYG{n}{not}\PYG{+w}{ }\PYG{n}{IsEmpty}\PYG{p}{(}\PYG{n}{New}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{do}
+\PYG{+w}{            }\PYG{k}{if}\PYG{+w}{ }\PYG{n}{not}\PYG{+w}{ }\PYG{n}{IsEmpty}\PYG{p}{(}\PYG{n}{Intersect}\PYG{p}{(}\PYG{n}{New}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Not}\PYG{p}{(}\PYG{n}{Inv}\PYG{p}{)))}\PYG{+w}{ }\PYG{n}{then}
+\PYG{+w}{                }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{False}
+\PYG{+w}{            }\PYG{n}{end}\PYG{+w}{ }\PYG{k}{if}
+\PYG{+w}{            }\PYG{n}{New}\PYG{+w}{ }\PYG{err}{←}\PYG{+w}{ }\PYG{n}{Diff}\PYG{p}{(}\PYG{n}{Post}\PYG{p}{(}\PYG{n}{New}\PYG{p}{,}\PYG{n}{Trans}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{Reach}\PYG{p}{)}
+\PYG{+w}{            }\PYG{n}{Reach}\PYG{+w}{ }\PYG{err}{←}\PYG{+w}{ }\PYG{n}{Union}\PYG{p}{(}\PYG{n}{Reach}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{New}\PYG{p}{)}
+\PYG{+w}{        }\PYG{n}{end}\PYG{+w}{ }\PYG{k}{while}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{True}
+\PYG{+w}{    }\PYG{n}{end}\PYG{+w}{ }\PYG{n}{function}
+\end{Verbatim}

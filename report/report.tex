@@ -18,14 +18,16 @@
 % \usepackage{fancyhdr}
 % \pagestyle{fancy}
 
-% \usepackage{amsmath}
-% \usepackage{dsfont}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{dsfont}
 % \newcommand*{\Z}{\mathds{Z}}
 
-% %\usepackage{minted, xcolor}
-% %\usemintedstyle{monokai}
-% %\definecolor{bg}{HTML}{282828}
-% %\usepackage[defaultmono]{droidsansmono}
+\usepackage{minted, xcolor}
+%\usemintedstyle{monokai}
+\definecolor{bg}{HTML}{F0F0F0}
+\usepackage[defaultmono]{droidsansmono}
 % \usepackage[T1]{fontenc}
 
 % \pretitle{%
@@ -42,26 +44,24 @@
 \renewcommand*\contentsname{Indice}
 
 \begin{document}
-	\maketitle
-	\pagebreak
+    \maketitle
+    \pagebreak
 
-	\tableofcontents
-	\pagebreak
+    \tableofcontents
+    \pagebreak
 
     \section{Notazione}
     \begin{description}
         \item[$Post$]: funzione che rappresenta la regione di stati raggiungibili da una regione data applicando un solo passo di transizione.
     \end{description}
 
-	\section{Come funziona?}
-	Idea intuitiva:
-    %Partendo da uno stato iniziale si applica ripetutamente una funzione di transizione simbolica che raggiunge progressivamente uno stato finale.
-
+    \section{Come funziona?}
+    \subsection{Idea di base}
     L'obiettivo di questo algoritmo è, dati una regione di stati iniziali $Init$, una funzione di transizione $Trans$ e un invariante $Inv$, decidere se $Inv$ è verificato in tutti gli stasti raggiungibili a partire da $Init$ applicando $Trans$.
 
     L'idea per fare ciò è trovare una rappresentazione simbolica di tutti e soli gli stati raggiungibili dal sistema.
     Così facendo risulta semplice verificare se in alcuni di questi stati l'invariante non è verificato.
-	È possibile utilizzare un'ottimizzazione per evitare di calcolare tutti gli stati nel caso in cui nel processo vengano trovati degli stati che non soddisfano l'invariante.
+    È possibile utilizzare un'ottimizzazione per evitare di calcolare tutti gli stati nel caso in cui nel processo vengano trovati degli stati che non soddisfano l'invariante.
 
     Per fare ciò, utilizziamo una variabile $Reach$ che rappresenta gli stati raggiungibili dal sistema e la aggiorniamo iterativamente.
     L'idea di base è che all'iterazione $t$, $Reach$ rappresenta tutti gli stati raggiungibili a partire da $Init$ e applicando $Trans$ al più $t$ volte.
@@ -70,22 +70,56 @@
         \item $Post(Reach) \subseteq Reach $: abbiamo trovato tutti i possibili stati raggiungibili;
         \item $Reach \cap \neg Inv \neq \emptyset$: abbiamo trovato alcuni stati raggiungibili in cui non vale l'invariante.
     \end{enumerate}
+
+    %TODO
+    \textbf{TODO Disegnino}
+
+    \subsection{Implementazione}
+    Di seguito viene riportato lo pseudocodice dell'algoritmo già descritto:
+
+    %TOEND
+    \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
+function IsInvariantRespected(Init, Trans, Inv)
+    |$NotInv \leftarrow \neg Inv$|
+    |$Reach \leftarrow Init$|
+    |$New \leftarrow Init$|
+    while |$New \neq \varnothing$| do
+        if |$New \cap NotInv \neq \varnothing$| then
+            return False
+        end if
+        |$New \leftarrow Post(New, Trans) \setminus Reach$|
+        |$Reach \leftarrow Reach \cup New$|
+    end while
+    return True
+end function
+    \end{minted}
+
+    Per l'Implementazione effettiva in python è sufficiente tradurre le seguenti istruzioni:
+    \begin{itemize}
+        \item $A \leftarrow B$ diventa: \mintinline{python}{A = B}
+        \item $\neg A$ diventa: \mintinline{python}{~A}
+        \item $A \neq \varnothing$ diventa: \mintinline{python}{not A.is_false()}
+        \item $A \cap B \neq \varnothing$ diventa: \mintinline{python}{A.intersected(B)}
+        \item $Post(A, Trans)$ diventa: \mintinline{python}{model.post(A)}
+        \item $A \setminus B$ diventa: \mintinline{python}{A - B}
+        \item $A \cup B$ diventa: \mintinline{python}{A + B}
+    \end{itemize}
+
+    %TODO spiegare operatori
+
+    %TODO maybe pensare se mettere il codice easy python
     
-	\begin{enumerate}
-		\item reachability
-		\begin{itemize}
-			\item se è vero vediamo se ci sono nuovi stati
-			\item se è falso la condizione è soddisfatta
-		\end{itemize}
-		\item partire dal falso e andare a ritroso
-	\end{enumerate}
+    \section{Perché funziona?}
+    Definiamo $\mathbb U$ l'insieme di tutti i possibili stati del modello. Sappiamo che l'insieme è finito, perché ogni stato è una combinazione di un numero finito e costante di variabili, che possono assumere un numero finito di valori.
+    Definiamo $Inv \subseteq \mathbb U$.
+    Definiamo $Reach^k$ in modo tale che:
+    \begin{itemize}
+        \item $Reach^0 = Init$
+        \item $Reach^{k + 1} = Post(Reach^k)$
+    \end{itemize}
 
-	\section{Perché funziona?}
-	Spiegazione formale
+    Vogliamo dimostrare che l'algoritmo ritorna true sse: $Reach^k \subseteq Inv\ \forall k$.
+    Definiamo $NotInv \vcentcolon= \mathbb U \setminus Inv \subseteq \mathbb U$.
 
-	\section{boh}
-	boh più esplictito
-
-	\section{boh2}
-	ecc..
+    \subsection{Dimostrazione}
 \end{document}
