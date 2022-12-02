@@ -9,3 +9,4 @@ venv
 *.blg
 *.fdb_latexmk
 *.xdv
+_minted-report/*.pygtex
