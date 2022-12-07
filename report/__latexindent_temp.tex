@@ -112,90 +112,35 @@ end function
     \section{Perché funziona?}
     Definiamo:
     \begin{itemize}
-        \item $\mathbb U$ l'insieme di tutti i possibili stati del modello;
-        \item $Inv \subseteq \mathbb U$ insieme degli stati che rispettano l'invariante;
-        \item $NotInv \vcentcolon= \mathbb U \setminus Inv \subseteq \mathbb U$;
-        \item $Reach^k$ è l'insieme degli stati raggiungibili in al più $k$ step, definito in modo tale che:
+        \item $\mathbb U$ l'insieme di tutti i possibili stati del modello. \\
+        \item $Inv \subseteq \mathbb U$ insieme degli stati che rispettano l'invariante. \\
+        \item $Reach^k$ in modo tale che:
         $$
             \begin{cases}
                 Reach^0 = Init \\
-                Reach^{k + 1} = Reach^k \cup Post(Reach^k)
+                Reach^{k + 1} = Post(Reach^k)
             \end{cases}
-        $$;
-        \item $New^k$ è l'insieme degli stati raggiungibili in esattamente $k$ step, definito in modo tale che:
         $$
-            \begin{cases}
-                New^0 = Init \\
-                New^{k + 1} = Reach^{k+1} \setminus Reach^k
-            \end{cases}
-        $$.
     \end{itemize}
-    Vogliamo dimostrare che:
-    \begin{itemize}
-        \item l'algoritmo termina sempre;
-        \item $Reach^k \subseteq Inv\ \forall k$ se l'algoritmo ritorna true;
-        \item $\exists k \mbox{ s.t. } Reach^k \cap \neg Inv \neq \varnothing$ se l'algoritmo ritorna false.
-    \end{itemize}
+    Vogliamo dimostrare che l'algoritmo ritorna true sse $Reach^k \subseteq Inv\ \forall k$.
 
     \subsection{Dimostrazione}
+    La dimostrazione si compone di due parti.
+    Nella prima, dimostriamo
+    
+    Sappiamo che l'insieme è finito, perché ogni stato è una combinazione di un numero finito e costante di variabili, che possono assumere un numero finito di valori. \\
+    Definiamo $NotInv \vcentcolon= \mathbb U \setminus Inv \subseteq \mathbb U$.
 
-    \paragraph{Terminazione}
-    Dimostriamo che l'algoritmo termina sempre.
-
-    Sappiamo che $\mathbb U$ è finito, perché ogni stato è una combinazione di un numero finito e costante di variabili, che possono assumere un numero finito di valori.
-    Inoltre, $\exists n$ tale per cui:
+    Definiamo $New^k$ in modo tale che:
     $$
-    \begin{cases}
-          Reach^k \subset Reach^{k+1} & \forall k < n \\
-          Reach^k = Reach^{k+1} & \forall k \geq n
-    \end{cases}
+        \begin{cases}
+            New^0 = Init \\
+            New^{k + 1} = Post(New^k) \setminus Reach^k
+        \end{cases}
     $$
-    Il motivo per cui è necessaria l'esistenza di tale $n$ è che la serie $(Reach^k)_k$ è crescente (per definizione di $Reach$), discreta (trattandosi di insiemi) e limitata superiormente (poiché $Reach^k \subseteq \mathbb U\ \forall k$).
+
+    Se l'algoritmo termina in 0 iterazioni: $New^0 = Init = \varnothing$, $\varnothing \subseteq Inv$ e l'algoritmo ritorna true;\\
     
-    Di conseguenza, per la definizione di $New$, avremo che $\exists n$ tale che $New^{k+1} = Reach^{k+1} \setminus Reach^k = \varnothing\ \forall k \geq n$.
-
-    Ciò significa che in al più $n$ iterazioni, l'algoritmo esce dal ciclo principale.
-
-    \paragraph{Assenza di falsi positivi}
-    Dimostriamo di seguito che $Reach^k \subseteq Inv\ \forall k$ se l'algoritmo ritorna true.
-
-    È banale vedere che se l'algoritmo ritorna true, allora il ciclo while è terminato dopo $k$ iterazioni perché $New^k = \varnothing$ e in ogni iterazione precedente non si è entrati nella condizione di riga 6. Ovvero, $New^{k'} \cap NotInv = \varnothing\ \forall k' < k$.
-    Inoltre, $New^k = \varnothing \subseteq Inv$.
-
-    Di conseguenza è possibile affermare che se l'algoritmo ritorna true allora $New^{k'} \subseteq Inv\ \forall k' \leq k$.
-
-    Procediamo ora per induzione su $k$ per dimostrare che se $New^{k'} \subseteq Inv\ \forall k' \leq k$ allora $Reach^k \subseteq Inv$.
-    
-    \subparagraph*{Caso base:}
-    Per $k = 0$ abbiamo $Reach^0 = Init = New^0$ per le definizioni di $Reach$ e $New$. Di conseguenza, $New^0 \subseteq Inv \implies Reach^0 \subseteq Inv$ è trivially true.
-
-    \subparagraph*{Caso induttivo ($k+1$):}
-    Per la definizione di $New$ sappiamo che $New^{k + 1} = Reach^{k+1} \setminus Reach^k$.
-    Inoltre, per induzione assumiamo che $New^{k'} \subseteq Inv\ \forall k' \leq k \implies Reach^k \subseteq Inv$.
-    Di conseguenza
-
-    Questo è da dimostrare:
-    $New^{k'} \subseteq Inv\ \forall k' \leq k+1 \implies Reach^{k+1} \subseteq Inv$
-
-    Tautologia 1:
-    $New^{k'} \subseteq Inv\ \forall k' \leq k+1 \implies New^{k'} \subseteq Inv\ \forall k' \leq k$
-
-    Ipotesi induttiva:
-    $New^{k'} \subseteq Inv\ \forall k' \leq k \implies Reach^k \subseteq Inv$
-
-    Tautologia 2:
-    $New^{k'} \subseteq Inv\ \forall k' \leq k+1 \implies New^k \subseteq Inv$
-
-    Definizione di $New$: 
-    $Reach^{k+1} = Reach^{k} \cup New^{k+1}$
-
-
-    % La dimostrazione si compone di due parti.
-    % Nella prima, dimostriamo che le variabili matematiche usate corrispondono rispettivamente alle omonime variabili del codice.
-    % In particolare, dimostriamo che 
-      
-    % Se l'algoritmo termina in 0 iterazioni: $New^0 = Init = \varnothing$, $\varnothing \subseteq Inv$ e l'algoritmo ritorna true; \\
-    
-    % Caso induttivo: se l'algoritmo termina in $k$ iterazioni allora ritorna true sse $Reach^k \subseteq Inv\ \forall k \implies$ se l'algoritmo termina in $k + 1$ iterazioni allora ritorna true sse $Reach^k \subseteq Inv\ \forall k$
+    Caso induttivo: se l'algoritmo termina
 
 \end{document}
