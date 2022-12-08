@@ -39,7 +39,7 @@
 % \posttitle{\end{center}}
 
 \title{\textbf{Università di Padova \\ Formal Methods for Cyber-Physical Systems project report}}
-\author{Alberto Lazari - 1216747\\}
+\author{Alberto Lazari - 1216747 \\}
 \date{Giugno 2022 - A.A. 2021-2022}
 
 \renewcommand*\contentsname{Indice}
@@ -53,7 +53,8 @@
 
     \section{Notazione}
     \begin{description}
-        \item[$Post$]: funzione che rappresenta la regione di stati raggiungibili da una regione data applicando un solo passo di transizione.
+        \item $Post$: funzione che rappresenta la regione di stati raggiungibili da una regione data applicando un solo passo di transizione;
+        \item $List[i]$: elemento di una lista $List$ di indice $Size(List) - i, i \in \mathbb N$.
     \end{description}
 
     \section{Reachability}
@@ -277,15 +278,15 @@ end function
     La modifica all'ultimo elemento prima della ricorsione serve a garantire il mantenimento di questa proprietà.
 
     \subsection{Implementazione}
-    Di seguito viene riportato lo pseudocodice dell'algoritmo per creare la trace degli stati che portano il sistema a non rispettare l'invariante:
+    Di seguito viene riportato lo pseudocodice dell'algoritmo per creare la tracce degli stati che portano il sistema a non rispettare l'invariante:
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||, linenos]{python}
 function CreateTrace(SymTrace)
     if len(SymTrace) == 0 return []
     if len(SymTrace) == 1 return [PickOneState(SymTrace[0])]
 
-    SymTarget |$\leftarrow$| Symtrace.pop()
+    SymTarget |$\leftarrow$| SymTrace.pop()
     Target |$\leftarrow$| PickOneState(SymTarget)
-    SymTrace.last = SymTrace.last |$\cap$| Pre(Target)
+    SymTrace[-1] = SymTrace[-1] |$\cap$| Pre(Target)
     Trace |$\leftarrow$| CreateTrace(SymTrace)
     Trace |$\leftarrow$| Trace + Target
     return Trace
@@ -296,15 +297,82 @@ end function
     \subsection{Dimostrazione di correttezza}
     \begin{itemize}
         \item Precondizione:
-            \begin{itemize}
-                \item SymTrace è una lista di regioni disgiunte;
-                \item ogni elemento in ogni regione in SymTrace è raggiungibile da almeno un elemento della regione precedente se esiste.
-            \end{itemize}
+        \begin{equation}
+            \begin{cases}
+                i \neq j \implies SymTrace[i] \cap SymTrace[j] = \varnothing\ \forall i, j \\
+                SymTrace[i] = R \wedge \exists SymTrace[i+1] \implies SymTrace[i+1] \subseteq Post(R)
+            \end{cases}
+        \end{equation}
         \item Postcondizione: La funzione ritorna una lista Trace di stati tali che:
-        \begin{itemize}
-            \item SymTrace[i] = R $\implies$ Trace[i] $\in$ R;
-            \item Trace[i+1] $\in$ Post(\{Trace[i]\}).
-        \end{itemize}
+        \begin{equation}
+            \begin{cases}
+                SymTrace[i] = R \implies Trace[i] \in R \\
+                \forall i \mbox{ s.t. } 0 \leq i < SymTrace.size - 1, Trace[i+1] \in Post(\{Trace[i]\})
+            \end{cases}
+        \end{equation}
     \end{itemize}
+
+    \subparagraph*{Caso base - SymTrace vuota}
+    Ritorniamo una lista vuota che sottisfa trivialmente entrambe le post condizioni.
+
+    \subparagraph*{Caso base - SymTrace con un elemento}
+    SymTrace è composta da una sola regione R e ritorniamo una lista composta da uno stato qualsiasi di R.
+    SymTrace[0] = R e Trace[0] $\in$ R.
+    Mentre la seconda postcondizione è trivialmente vera perché Trace ha un solo elemento.
+
+    \subparagraph*{Caso ricorsivo}
+    SymTrace ha almeno due elementi.
+    
+    SymTrace' è il valore originale di SymTrace.
+
+    \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
+SymTarget |$\leftarrow$| SymTrace.pop()
+Target |$\leftarrow$| PickOneState(SymTarget)
+    \end{minted}
+
+    Target $\in$ SymTrace[-1] per le proprietà della funzione PickOneState.
+
+    SymTrace è SymTrace' privato dell'ultimo elemento
+     
+    \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
+    SymTrace[-1] = SymTrace[-1] |$\cap$| Pre(Target)
+    \end{minted}
+
+    Target $\in$ Post(\{s\}) $\forall$ s $\in$ SymTrace[-1]
+
+    la pre ric è rispettata perché:
+    \begin{itemize}
+        \item se SymTrace' è una lista di regioni disgiunte allora anche Symtrace[0:-1] = SymTrace'[0:-2] è una lista di regioni disgiunte;
+        inoltre, SymTrace[-1] $\subseteq$ SymTrace'[-2] implica che SymTrace[-1] è disgiunto da tutti gli altri elementi di SymTrace;
+        \item Data la Precondizione e dato che $\forall i \mbox{ t.c. } 0 \leq i < SymTrace.size - 1 : SymTrace[i] = Symtrace'[i]\ e\ SymTrace[-1] \subseteq SymTrace'[-2] $, allora
+        \begin{equation}
+            \forall i \mbox{ s.t. } 1 \leq i < SymTrace.size, \forall e \in SymTrace[i],  e \in Post(SymTrace[i-1])
+        \end{equation}
+    \end{itemize}
+
+    \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
+ Trace |$\leftarrow$| CreateTrace(SymTrace)
+    \end{minted}
+
+    quindi Trace' = CreateTrace(SymTrace) rispetta la post di CreateTrace.
+    
+    \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||, linenos]{python}
+    Trace |$\leftarrow$| Trace + Target
+    \end{minted}
+
+    La Postcondizione è rispettata se:
+    \begin{numcases}{}
+        SymTrace[i] = R \implies Trace[i] \in R; \label{qualcosa1} \\
+        \forall i \mbox{ s.t. } 0 \leq i < SymTrace.size - 1, Trace[i+1] \in Post(\{Trace[i]\}). \label{qualcosa2}
+    \end{numcases}
+
+    (\ref{qualcosa1}) è rispettata:
+    \begin{itemize}
+        \item per tutti gli elementi tranne l'ultimo, a seguito della post ricorsiva;
+        \item per l'ultimo elemento di Trace = Target $\in$ SymTrace[-1], perché ottenuto tramite PickOneState(SymTrace[-1]).
+    \end{itemize}
+
+    (\ref{qualcosa2}) è rispettata $\forall i \mbox{ s.t. } 0 \leq i < SymTrace.size - 2$ a seguito della post ricorsiva, mentre Trace[-1] = target $\in Post(\{Trace[-2]\})$, perché target è ottenuto tramite PickOneState(SymTrace[-1]) e SymTrace[-1] $\subseteq$ Post(SymTrace[-2]).
+    
 
 \end{document}
