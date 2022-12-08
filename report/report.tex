@@ -44,6 +44,7 @@
 
 \renewcommand*\contentsname{Indice}
 
+%TODO tradurre in inglese
 \begin{document}
     \maketitle
     \pagebreak
@@ -73,13 +74,11 @@
         \item $Reach \cap NotInv \neq \emptyset$: abbiamo trovato alcuni stati raggiungibili in cui non vale l'invariante.
     \end{enumerate}
 
-    %TODO
     \textbf{TODO Disegnino}
 
     \subsection{Implementazione}
     Di seguito viene riportato lo pseudocodice dell'algoritmo già descritto:
 
-    %TOEND
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||, linenos]{python}
 function IsInvariantRespected(Init, Trans, Inv)
     NotInv |$\leftarrow \mathbb U\ \setminus$| Inv
@@ -107,10 +106,6 @@ end function
         \item $A \cup B$ diventa: \mintinline{python}{A + B}
     \end{itemize}
 
-    %TODO spiegare operatori
-
-    %TODO maybe pensare se mettere il codice easy python
-    
     \subsection{Dimostrazione di correttezza}
     Definiamo:
     \begin{itemize}
@@ -340,11 +335,11 @@ Target |$\leftarrow$| PickOneState(SymTarget)
 
     Target $\in$ Post(\{s\}) $\forall$ s $\in$ SymTrace[-1]
 
-    la pre ric è rispettata perché:
+    La precondizione della chiamata ricorsiva è rispettata perché:
     \begin{itemize}
         \item se SymTrace' è una lista di regioni disgiunte allora anche Symtrace[0:-1] = SymTrace'[0:-2] è una lista di regioni disgiunte;
         inoltre, SymTrace[-1] $\subseteq$ SymTrace'[-2] implica che SymTrace[-1] è disgiunto da tutti gli altri elementi di SymTrace;
-        \item Data la Precondizione e dato che $\forall i \mbox{ t.c. } 0 \leq i < SymTrace.size - 1 : SymTrace[i] = Symtrace'[i]\ e\ SymTrace[-1] \subseteq SymTrace'[-2] $, allora
+        \item Data la precondizione e dato che $\forall i \mbox{ t.c. } 0 \leq i < SymTrace.size - 1 : SymTrace[i] = Symtrace'[i]\ e\ SymTrace[-1] \subseteq SymTrace'[-2] $, allora
         \begin{equation}
             \forall i \mbox{ s.t. } 1 \leq i < SymTrace.size, \forall e \in SymTrace[i],  e \in Post(SymTrace[i-1])
         \end{equation}
@@ -354,25 +349,27 @@ Target |$\leftarrow$| PickOneState(SymTarget)
  Trace |$\leftarrow$| CreateTrace(SymTrace)
     \end{minted}
 
-    quindi Trace' = CreateTrace(SymTrace) rispetta la post di CreateTrace.
+    quindi Trace' = CreateTrace(SymTrace) rispetta la postcondizione di CreateTrace.
     
-    \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||, linenos]{python}
+    \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
     Trace |$\leftarrow$| Trace + Target
     \end{minted}
 
     La Postcondizione è rispettata se:
     \begin{numcases}{}
-        SymTrace[i] = R \implies Trace[i] \in R; \label{qualcosa1} \\
-        \forall i \mbox{ s.t. } 0 \leq i < SymTrace.size - 1, Trace[i+1] \in Post(\{Trace[i]\}). \label{qualcosa2}
+        SymTrace[i] = R \implies Trace[i] \in R; \label{th:trace:ric:dim-post:1} \\
+        \forall i \mbox{ s.t. } 0 \leq i < SymTrace.size - 1, Trace[i+1] \in Post(\{Trace[i]\}). \label{th:trace:ric:dim-post:2}
     \end{numcases}
 
-    (\ref{qualcosa1}) è rispettata:
+    (\ref{th:trace:ric:dim-post:1}) è rispettata:
     \begin{itemize}
-        \item per tutti gli elementi tranne l'ultimo, a seguito della post ricorsiva;
+        \item per tutti gli elementi tranne l'ultimo, a seguito della postcondizione ricorsiva;
         \item per l'ultimo elemento di Trace = Target $\in$ SymTrace[-1], perché ottenuto tramite PickOneState(SymTrace[-1]).
     \end{itemize}
 
-    (\ref{qualcosa2}) è rispettata $\forall i \mbox{ s.t. } 0 \leq i < SymTrace.size - 2$ a seguito della post ricorsiva, mentre Trace[-1] = target $\in Post(\{Trace[-2]\})$, perché target è ottenuto tramite PickOneState(SymTrace[-1]) e SymTrace[-1] $\subseteq$ Post(SymTrace[-2]).
-    
-
+    (\ref{th:trace:ric:dim-post:1}) è rispettata:
+    \begin{itemize}
+        \item $\forall i \mbox{ s.t. } 0 \leq i < SymTrace.size - 2$ a seguito della postcondizione ricorsiva;
+        \item Trace[-1] = target $\in Post(\{Trace[-2]\})$, perché target è ottenuto tramite PickOneState(SymTrace[-1]) e SymTrace[-1] $\subseteq$ Post(SymTrace[-2]).
+    \end{itemize}
 \end{document}
