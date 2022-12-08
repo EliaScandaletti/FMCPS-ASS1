@@ -22,12 +22,13 @@
 \usepackage{amssymb}
 \usepackage{mathtools}
 \usepackage{dsfont}
+\usepackage{cases}
 % \newcommand*{\Z}{\mathds{Z}}
 
 \usepackage{minted, xcolor}
 %\usemintedstyle{monokai}
 \definecolor{bg}{HTML}{F0F0F0}
-\usepackage[defaultmono]{droidsansmono}
+% \usepackage[defaultmono]{droidsansmono}
 % \usepackage[T1]{fontenc}
 
 % \pretitle{%
@@ -55,7 +56,7 @@
         \item[$Post$]: funzione che rappresenta la regione di stati raggiungibili da una regione data applicando un solo passo di transizione.
     \end{description}
 
-    \section{Come funziona?}
+    \section{Reachability}
     \subsection{Idea di base}
     L'obiettivo di questo algoritmo è, dati una regione di stati iniziali $Init$, una funzione di transizione $Trans$ e un invariante $Inv$, decidere se $Inv$ è verificato in tutti gli stasti raggiungibili a partire da $Init$ applicando $Trans$.
 
@@ -68,7 +69,7 @@
     L'algoritmo si interrompe quando si verifica una delle due seguenti condizioni:
     \begin{enumerate}
         \item $Post(Reach) \subseteq Reach $: abbiamo trovato tutti i possibili stati raggiungibili;
-        \item $Reach \cap \neg Inv \neq \emptyset$: abbiamo trovato alcuni stati raggiungibili in cui non vale l'invariante.
+        \item $Reach \cap NotInv \neq \emptyset$: abbiamo trovato alcuni stati raggiungibili in cui non vale l'invariante.
     \end{enumerate}
 
     %TODO
@@ -80,15 +81,15 @@
     %TOEND
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||, linenos]{python}
 function IsInvariantRespected(Init, Trans, Inv)
-    |$NotInv \leftarrow \neg Inv$|
-    |$Reach \leftarrow Init$|
-    |$New \leftarrow Init$|
-    while |$New \neq \varnothing$| do
-        if |$New \cap NotInv \neq \varnothing$| then
+    NotInv |$\leftarrow \mathbb U\ \setminus$| Inv
+    Reach |$\leftarrow$| Init
+    New |$\leftarrow$| Init
+    while New |$\neq \varnothing$| do
+        if New |$\cap$| NotInv |$\neq \varnothing$| then
             return False
         end if
-        |$New \leftarrow Post(New, Trans) \setminus Reach$|
-        |$Reach \leftarrow Reach \cup New$|
+        New |$\leftarrow$| Post(New, Trans) |$\setminus$| Reach
+        Reach |$\leftarrow$| Reach |$\cup$| New
     end while
     return True
 end function
@@ -97,7 +98,7 @@ end function
     Per l'Implementazione effettiva in python è sufficiente tradurre le seguenti istruzioni:
     \begin{itemize}
         \item $A \leftarrow B$ diventa: \mintinline{python}{A = B}
-        \item $\neg A$ diventa: \mintinline{python}{~A}
+        \item $\mathbb U\ \setminus A$ diventa: \mintinline{python}{~A}
         \item $A \neq \varnothing$ diventa: \mintinline{python}{not A.is_false()}
         \item $A \cap B \neq \varnothing$ diventa: \mintinline{python}{A.intersected(B)}
         \item $Post(A, Trans)$ diventa: \mintinline{python}{model.post(A)}
@@ -109,7 +110,7 @@ end function
 
     %TODO maybe pensare se mettere il codice easy python
     
-    \section{Perché funziona?}
+    \subsection{Dimostrazione di correttezza}
     Definiamo:
     \begin{itemize}
         \item $\mathbb U$ l'insieme di tutti i possibili stati del modello;
@@ -121,28 +122,80 @@ end function
                 Reach^0 = Init \\
                 Reach^{k + 1} = Reach^k \cup Post(Reach^k)
             \end{cases}
-        $$;
+        $$
         \item $New^k$ è l'insieme degli stati raggiungibili in esattamente $k$ step, definito in modo tale che:
         $$
             \begin{cases}
                 New^0 = Init \\
                 New^{k + 1} = Reach^{k+1} \setminus Reach^k
             \end{cases}
-        $$.
+        $$
     \end{itemize}
-    Vogliamo dimostrare che:
+    In questo modo, $Reach^k$ e $New^k$ corrispondono ai valori assunti dalle variabili \texttt{Reach} e \texttt{New} alla $k$-esima iterazione.
+
+    Vogliamo quindi dimostrare che:
     \begin{itemize}
+        % \item le definizioni date di $New^k$ e $Reach^k$ sono sound;
         \item l'algoritmo termina sempre;
         \item $Reach^k \subseteq Inv\ \forall k$ se l'algoritmo ritorna true;
-        \item $\exists k \mbox{ s.t. } Reach^k \cap \neg Inv \neq \varnothing$ se l'algoritmo ritorna false.
+        \item $\exists k \mbox{ s.t. } Reach^k \cap NotInv \neq \varnothing$ se l'algoritmo ritorna false.
     \end{itemize}
 
-    \subsection{Dimostrazione}
+    % \paragraph{Soundness of definitions}
+    % \newcommand{\New}{\mathtt{New}}
+    % \newcommand{\Reach}{\mathtt{Reach}}
+    % Dimostriamo per induzione su $k$ che la definizione di $New$ e $Reach$ è corretta.
+    % In particolare, dimostriamo che $New^k$ e $Reach^k$ corrispondono al valore delle variabili $\New^k$ e $\Reach^k$ al $k$-esimo ciclo dell'algoritmo.
+    % Ovvero, vogliamo dimostrare che
+    % \begin{equation}
+    %     New^k = \New^k \wedge Reach^k = \Reach^k\ \forall k
+    % \end{equation}
+
+    % \subparagraph*{Caso base:}
+    % $New^0 = Reach^0 = Init$ è corretto poiché corrisponde all'inizializzazione delle variabili nell'algoritmo.
+
+    % \subparagraph*{Caso induttivo ($k+1$):}
+    % Seguendo il flusso dell'algoritmo, assumendo che non sia già terminato, otteniamo:
+    % \begin{equation}\label{th:sound:def_var}
+    %     \begin{cases}
+    %         \New^{k+1} = Post(\New^k) \setminus \Reach^k \\
+    %         \Reach^{k+1} = \Reach^k \cup \New^k
+    %     \end{cases}
+    % \end{equation}
+
+    % Inoltre, per definizione di $New$ e $Reach$ sappiamo che:
+    % \begin{equation}\label{th:sound:def_ind}
+    %     \begin{cases}
+    %         Reach^{k+1} = Reach^k \cup Post(Reach^k) \\
+    %         New^{k+1} = Reach^{k+1} \setminus Reach^k 
+    %     \end{cases}
+    % \end{equation}
+
+    % Per ipotesi induttiva, sappiamo che:
+    % \begin{equation*}
+    %     \New^k = New^k \wedge \Reach^k = Reach^k
+    % \end{equation*}
+
+    % Sostituendo in (\ref{th:sound:def_var}), otteniamo
+    % \begin{equation}\label{th:sound:def_var_sost}
+    %     \begin{cases}
+    %         \New^{k+1} = Post(New^k) \setminus Reach^k \\
+    %         \Reach^{k+1} = Reach^k \cup New^k
+    %     \end{cases}
+    % \end{equation}
+
+    % Per dimostrare che $\New^{k+1} = New^{k+1}\ \wedge\ \Reach^{k+1} = Reach^{k+1}$, per la (\ref{th:sound:def_ind}) e la (\ref{th:sound:def_var_sost}), è ora sufficiente dimostrare che
+    % \begin{numcases}{}
+    %     Reach^k \cup New^k = Reach^k \cup Post(Reach^k) \\
+    %     Post(New^k) \setminus Reach^k = (Reach^k \cup New^k) \setminus Reach^k 
+    % \end{numcases}
 
     \paragraph{Terminazione}
-    Dimostriamo che l'algoritmo termina sempre.
+    Dimostriamo che l'algoritmo termina sempre ritornando True o False.
 
-    Sappiamo che $\mathbb U$ è finito, perché ogni stato è una combinazione di un numero finito e costante di variabili, che possono assumere un numero finito di valori.
+    Sappiamo che $\mathbb U$ è finito, perché ogni 
+    
+    stato è una combinazione di un numero finito e costante di variabili, che possono assumere un numero finito di valori.
     Inoltre, $\exists n$ tale per cui:
     $$
     \begin{cases}
@@ -154,7 +207,7 @@ end function
     
     Di conseguenza, per la definizione di $New$, avremo che $\exists n$ tale che $New^{k+1} = Reach^{k+1} \setminus Reach^k = \varnothing\ \forall k \geq n$.
 
-    Ciò significa che in al più $n$ iterazioni, l'algoritmo esce dal ciclo principale.
+    Ciò significa che in al più $n$ iterazioni, l'algoritmo esce dal ciclo principale e quando lo fa ritorna True. 
 
     \paragraph{Assenza di falsi positivi}
     Dimostriamo di seguito che $Reach^k \subseteq Inv\ \forall k$ se l'algoritmo ritorna true.
@@ -164,38 +217,94 @@ end function
 
     Di conseguenza è possibile affermare che se l'algoritmo ritorna true allora $New^{k'} \subseteq Inv\ \forall k' \leq k$.
 
-    Procediamo ora per induzione su $k$ per dimostrare che se $New^{k'} \subseteq Inv\ \forall k' \leq k$ allora $Reach^k \subseteq Inv$.
+    Procediamo ora per induzione su $k$ per dimostrare che 
+    \begin{equation}\label{th:true:tesi}
+        New^{k'} \subseteq Inv\ \forall k' \leq k \implies Reach^k \subseteq Inv
+    \end{equation}
     
     \subparagraph*{Caso base:}
     Per $k = 0$ abbiamo $Reach^0 = Init = New^0$ per le definizioni di $Reach$ e $New$. Di conseguenza, $New^0 \subseteq Inv \implies Reach^0 \subseteq Inv$ è trivially true.
 
     \subparagraph*{Caso induttivo ($k+1$):}
-    Per la definizione di $New$ sappiamo che $New^{k + 1} = Reach^{k+1} \setminus Reach^k$.
-    Inoltre, per induzione assumiamo che $New^{k'} \subseteq Inv\ \forall k' \leq k \implies Reach^k \subseteq Inv$.
-    Di conseguenza
+    Vogliamo dimostrare induttivamente che
+    \begin{equation}\label{th:true:ind:tesi}
+        New^{k'} \subseteq Inv\ \forall k' \leq k+1 \implies Reach^{k+1} \subseteq Inv
+    \end{equation}
+    Possiamo assumere che $New^{k'} \subseteq Inv\ \forall k' \leq k+1$, altrimenti la parte sinistra di (\ref{th:true:ind:tesi}) è falsa e, di conseguenza, il caso induttivo è trivialmente vero.
 
-    Questo è da dimostrare:
-    $New^{k'} \subseteq Inv\ \forall k' \leq k+1 \implies Reach^{k+1} \subseteq Inv$
+    Vogliamo dunque dimostrare $Reach^{k+1} \subseteq Inv$ assumendo
+    \begin{numcases}{}
+        New^{k'} \subseteq Inv\ \forall k' \leq k+1 & \mbox{per quanto appena detto} \label{th:true:ind:ass_1} \\
+        New^{k'} \subseteq Inv\ \forall k' \leq k \implies Reach^k \subseteq Inv & \mbox{per ipotesi induttiva} \label{th:true:ind:hp_ind} \\
+        Reach^{k+1} = Reach^{k} \cup New^{k+1} & \mbox{per definizione di $New$} \label{th:true:ind:def_new}
+    \end{numcases}
 
-    Tautologia 1:
-    $New^{k'} \subseteq Inv\ \forall k' \leq k+1 \implies New^{k'} \subseteq Inv\ \forall k' \leq k$
+    È banale osservare che da (\ref{th:true:ind:ass_1}) seguono
+    \begin{numcases}{}
+        New^{k'} \subseteq Inv\ \forall k' \leq k \label{th:true:ind:hp_ind:left} \\
+        New^{k+1} \subseteq Inv \label{th:true:ind:new}
+    \end{numcases}
 
-    Ipotesi induttiva:
-    $New^{k'} \subseteq Inv\ \forall k' \leq k \implies Reach^k \subseteq Inv$
+    La (\ref{th:true:ind:hp_ind}) e la (\ref{th:true:ind:hp_ind:left}) implicano
+    \begin{equation}\label{th:true:ind:hp_ind:right}
+        Reach^k \subseteq Inv
+    \end{equation}
 
-    Tautologia 2:
-    $New^{k'} \subseteq Inv\ \forall k' \leq k+1 \implies New^k \subseteq Inv$
-
-    Definizione di $New$: 
-    $Reach^{k+1} = Reach^{k} \cup New^{k+1}$
-
-
-    % La dimostrazione si compone di due parti.
-    % Nella prima, dimostriamo che le variabili matematiche usate corrispondono rispettivamente alle omonime variabili del codice.
-    % In particolare, dimostriamo che 
-      
-    % Se l'algoritmo termina in 0 iterazioni: $New^0 = Init = \varnothing$, $\varnothing \subseteq Inv$ e l'algoritmo ritorna true; \\
+    Infine, dalla (\ref{th:true:ind:def_new}), la (\ref{th:true:ind:new}) e la (\ref{th:true:ind:hp_ind:right}) segue la tesi induttiva (\ref{th:true:ind:tesi}).
     
-    % Caso induttivo: se l'algoritmo termina in $k$ iterazioni allora ritorna true sse $Reach^k \subseteq Inv\ \forall k \implies$ se l'algoritmo termina in $k + 1$ iterazioni allora ritorna true sse $Reach^k \subseteq Inv\ \forall k$
+    \paragraph{Assenza di falsi negativi}
+    Dimostriamo di seguito che se l'algoritmo ritorna false allora $\exists k \mbox{ s.t. } Reach^k \cap NotInv \neq \varnothing$.
+
+    È banale vedere che l'unico caso in cui l'algoritmo ritorna false è quando all'iterazione $k$ si verifica la condizione $New^k \cap NotInv \neq \varnothing$.
+    
+    \section{Counterexample search}
+    \subsection{Idea di base}
+    Durante la ricerca degli stati raggiungibili, ad ogni iterazione viene memorizzato l'insieme $New$ in una lista.
+    Se a una certa iterazione $New \cap NotInv = \varnothing$, invece di aggiungere in coda alla lista $New$ aggiungiamo $New \cap NotInv$, ovvero gli stati che non rispettano l'invariante.
+    A partire da questa lista costruiamo ricorsivamente la trace degli stati che portano il sistema a non rispettare l'invariante nel seguente modo:
+    \begin{itemize}
+        \item \textbf{Caso base:} Se la lista ha un solo elemento E, ritorno uno stato qualsiasi in E;
+        \item \textbf{Caso Induttivo:} Altrimenti, 
+        \begin{enumerate}
+            \item estrae dalla lista l'ultimo elemento \texttt{sym\_target};
+            \item sceglie uno stato qualsiasi in \texttt{sym\_target} che chiamiamo \texttt{target};
+            \item modifica il nuovo ultimo elemento della lista restringendolo in modo tale che da ogni suo elemento sia raggiungibile \texttt{target} in una iterazione;
+            \item invoca ricorsivamente sulla lista modificata e concatena il risutato con \texttt{target}.
+        \end{enumerate}
+    \end{itemize}
+
+    Questo algoritmo consente di poter sempre scegliere un elemento qualsiasi nella regione in coda alla lista.
+    La modifica all'ultimo elemento prima della ricorsione serve a garantire il mantenimento di questa proprietà.
+
+    \subsection{Implementazione}
+    Di seguito viene riportato lo pseudocodice dell'algoritmo per creare la trace degli stati che portano il sistema a non rispettare l'invariante:
+    \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||, linenos]{python}
+function CreateTrace(SymTrace)
+    if len(SymTrace) == 0 return []
+    if len(SymTrace) == 1 return [PickOneState(SymTrace[0])]
+
+    SymTarget |$\leftarrow$| Symtrace.pop()
+    Target |$\leftarrow$| PickOneState(SymTarget)
+    SymTrace.last = SymTrace.last |$\cap$| Pre(Target)
+    Trace |$\leftarrow$| CreateTrace(SymTrace)
+    Trace |$\leftarrow$| Trace + Target
+    return Trace
+end function
+    \end{minted}
+    Considerando Trace la lista di stati ottentua dalla funzione precedente, per ottenere gli input che portano il sistema da uno stato presente in Trace al successivo, basta utilizzare la funzione \mintinline{python}{GetInputsBetweenStates(State1, State2)} ed applicarla ad ogni coppia di stati adiacenti nella lista.
+    
+    \subsection{Dimostrazione di correttezza}
+    \begin{itemize}
+        \item Precondizione:
+            \begin{itemize}
+                \item SymTrace è una lista di regioni disgiunte;
+                \item ogni elemento in ogni regione in SymTrace è raggiungibile da almeno un elemento della regione precedente se esiste.
+            \end{itemize}
+        \item Postcondizione: La funzione ritorna una lista Trace di stati tali che:
+        \begin{itemize}
+            \item SymTrace[i] = R $\implies$ Trace[i] $\in$ R;
+            \item Trace[i+1] $\in$ Post(\{Trace[i]\}).
+        \end{itemize}
+    \end{itemize}
 
 \end{document}

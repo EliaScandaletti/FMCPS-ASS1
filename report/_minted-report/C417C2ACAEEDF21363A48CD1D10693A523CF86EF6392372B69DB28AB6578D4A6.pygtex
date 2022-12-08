@@ -1,0 +1,3 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{GetInputsBetweenStates}\PYG{p}{(}\PYG{n}{State1}\PYG{p}{,} \PYG{n}{State2}\PYG{p}{)}
+\end{Verbatim}

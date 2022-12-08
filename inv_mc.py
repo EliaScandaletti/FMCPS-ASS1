@@ -12,6 +12,9 @@ def spec_to_bdd(model, spec):
 
 
 def create_trace_inputs(model: pynusmv.fsm.BddFsm, trace: List[pynusmv.dd.State]) -> tuple[dict, ...]:
+    """
+    Return a tuple of dict which corresponds to the states in the given trace associated with their inputs
+    """
     prev = None
     full_trace = []
 
@@ -26,6 +29,9 @@ def create_trace_inputs(model: pynusmv.fsm.BddFsm, trace: List[pynusmv.dd.State]
 
 
 def create_trace(model: pynusmv.fsm.BddFsm, sym_trace: List[pynusmv.dd.BDD]) -> List[pynusmv.dd.State]:
+    """
+    Return a list of states which corresponds to the trace
+    """
     if len(sym_trace) == 0:
         return []
 

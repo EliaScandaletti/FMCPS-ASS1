@@ -1,0 +1,8 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
+        \PYG{n}{function} \PYG{n}{CreateTrace}\PYG{p}{(}\PYG{n}{SymTrace}\PYG{p}{)}
+            \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{SymTrace} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{)} \PYG{k}{return} \PYG{p}{[}\PYG{p}{]}
+            \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{SymTrace} \PYG{o}{==} \PYG{l+m+mi}{1}\PYG{p}{)} \PYG{k}{return} \PYG{p}{[}\PYG{n}{PickOneState}\PYG{p}{(}\PYG{n}{SymTrace}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{)}\PYG{p}{]}
+
+            \PYG{n}{SymTarget} \PYG{esc}{$\leftarrow$} \PYG{n}{Symtrace}\PYG{o}{.}\PYG{n}{pop}\PYG{p}{(}\PYG{p}{)}
+        \PYG{n}{end} \PYG{n}{function}
+\end{Verbatim}
