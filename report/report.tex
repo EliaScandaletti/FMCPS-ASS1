@@ -55,7 +55,15 @@
         \item $List[i]$: elemento di una lista $List$ di indice $Size(List) - i, i \in \mathbb N$.
     \end{description}
 
-    \section{Reachability}
+    \section{Structure of the report}
+    In this report the problem is divided in two parts:
+    \begin{itemize}
+        \item deciding if the invariant is always satisfied;
+        \item finding a counterexample in which the invariant is not satisfied.
+    \end{itemize}
+    Each of these parts is discussed separately in its own section.
+
+    \section{Invariant Satisfiability}
     \subsection{Intuitive idea}
     Given a region of initial states $Init$, a transition function $Trans$ and an invariant $Inv$, the goal of this algorithm is to decide if $Inv$ is verified in all the reachable states starting from $Init$ by applying $Trans$.
 
