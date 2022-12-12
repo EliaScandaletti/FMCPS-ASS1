@@ -54,30 +54,28 @@
 
     \section{Notazione}
     \begin{description}
-        \item $Post$: funzione che rappresenta la regione di stati raggiungibili da una regione data applicando un solo passo di transizione;
+        \item $Post$: function which represents the set of states reachable from a given region by applying a single step of transition;
         \item $List[i]$: elemento di una lista $List$ di indice $Size(List) - i, i \in \mathbb N$.
     \end{description}
 
     \section{Reachability}
-    \subsection{Idea di base}
-    L'obiettivo di questo algoritmo è, dati una regione di stati iniziali $Init$, una funzione di transizione $Trans$ e un invariante $Inv$, decidere se $Inv$ è verificato in tutti gli stasti raggiungibili a partire da $Init$ applicando $Trans$.
+    \subsection{Intuitive idea}
+    Given a region of initial states $Init$, a transition function $Trans$ and an invariant $Inv$, the goal of this algorithm is to decide if $Inv$ is verified in all the reachable states starting from $Init$ by applying $Trans$.
 
-    L'idea per fare ciò è trovare una rappresentazione simbolica di tutti e soli gli stati raggiungibili dal sistema.
-    Così facendo risulta semplice verificare se in alcuni di questi stati l'invariante non è verificato.
-    È possibile utilizzare un'ottimizzazione per evitare di calcolare tutti gli stati nel caso in cui nel processo vengano trovati degli stati che non soddisfano l'invariante.
+    To achieve this goal, a symbolic representation of all and only the reachable states of the system needs to be found. In this way, it is easy to check if the invariant is not verified in some of these states. An optimization can be used to avoid calculating all the states if some states that do not satisfy the invariant are found during the process.
 
-    Per fare ciò, utilizziamo una variabile $Reach$ che rappresenta gli stati raggiungibili dal sistema e la aggiorniamo iterativamente.
-    L'idea di base è che all'iterazione $t$, $Reach$ rappresenta tutti gli stati raggiungibili a partire da $Init$ e applicando $Trans$ al più $t$ volte.
-    L'algoritmo si interrompe quando si verifica una delle due seguenti condizioni:
+    In order to do this, a variable $Reach$ is used to represent the reachable states of the system and it is updated iteratively.
+    The basic idea is that at iteration $t$, $Reach$ represents all the states reachable from $Init$ by applying $Trans$ at most $t$ times.
+    The algorithm stops when one of the following conditions is verified:
     \begin{enumerate}
-        \item $Post(Reach) \subseteq Reach $: abbiamo trovato tutti i possibili stati raggiungibili;
-        \item $Reach \cap NotInv \neq \emptyset$: abbiamo trovato alcuni stati raggiungibili in cui non vale l'invariante.
+        \item $Post(Reach) \subseteq Reach $: we have found all the reachable states;
+        \item $Reach \cap NotInv \neq \emptyset$: we have found some reachable states in which the invariant is not verified.
     \end{enumerate}
 
     \textbf{TODO Disegnino}
 
-    \subsection{Implementazione}
-    Di seguito viene riportato lo pseudocodice dell'algoritmo già descritto:
+    \subsection{Implementation}
+    The implementation of the algorithm in pseudocode is the following:
 
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||, linenos]{python}
 function IsInvariantRespected(Init, Trans, Inv)
@@ -95,31 +93,31 @@ function IsInvariantRespected(Init, Trans, Inv)
 end function
     \end{minted}
 
-    Per l'Implementazione effettiva in python è sufficiente tradurre le seguenti istruzioni:
+    For the Python implementation, it is sufficient to translate the following instructions:
     \begin{itemize}
-        \item $A \leftarrow B$ diventa: \mintinline{python}{A = B}
-        \item $\mathbb U\ \setminus A$ diventa: \mintinline{python}{~A}
-        \item $A \neq \varnothing$ diventa: \mintinline{python}{not A.is_false()}
-        \item $A \cap B \neq \varnothing$ diventa: \mintinline{python}{A.intersected(B)}
-        \item $Post(A, Trans)$ diventa: \mintinline{python}{model.post(A)}
-        \item $A \setminus B$ diventa: \mintinline{python}{A - B}
-        \item $A \cup B$ diventa: \mintinline{python}{A + B}
+        \item $A \leftarrow B$ becomes: \mintinline{python}{A = B}
+        \item $\mathbb U\ \setminus A$ becomes: \mintinline{python}{~A}
+        \item $A \neq \varnothing$ becomes: \mintinline{python}{not A.is_false()}
+        \item $A \cap B \neq \varnothing$ becomes: \mintinline{python}{A.intersected(B)}
+        \item $Post(A, Trans)$ becomes: \mintinline{python}{model.post(A)}
+        \item $A \setminus B$ becomes: \mintinline{python}{A - B}
+        \item $A \cup B$ becomes: \mintinline{python}{A + B}
     \end{itemize}
 
-    \subsection{Dimostrazione di correttezza}
-    Definiamo:
+    \subsection{Proof of correctness}
+    Let:
     \begin{itemize}
-        \item $\mathbb U$ l'insieme di tutti i possibili stati del modello;
-        \item $Inv \subseteq \mathbb U$ insieme degli stati che rispettano l'invariante;
+        \item $\mathbb U$ be the set of all the possible states of the model;
+        \item $Inv \subseteq \mathbb U$ be the set of all the states that do satisfy the invariant;
         \item $NotInv \vcentcolon= \mathbb U \setminus Inv \subseteq \mathbb U$;
-        \item $Reach^k$ è l'insieme degli stati raggiungibili in al più $k$ step, definito in modo tale che:
+        \item $Reach^k$ be the set of all the states reachable in at most $k$ steps, defined as:
         $$
             \begin{cases}
                 Reach^0 = Init \\
                 Reach^{k + 1} = Reach^k \cup Post(Reach^k)
             \end{cases}
         $$
-        \item $New^k$ è l'insieme degli stati raggiungibili in esattamente $k$ step, definito in modo tale che:
+        \item $New^k$ be the set of all the states reachable in exactly $k$ steps, defined as:
         $$
             \begin{cases}
                 New^0 = Init \\
@@ -127,14 +125,15 @@ end function
             \end{cases}
         $$
     \end{itemize}
-    In questo modo, $Reach^k$ e $New^k$ corrispondono ai valori assunti dalle variabili \texttt{Reach} e \texttt{New} alla $k$-esima iterazione.
+    This way, $Reach^k$ and $New^k$ correspond to the values taken by the variables \texttt{Reach} and \texttt{New} at the $k$-th iteration.
 
-    Vogliamo quindi dimostrare che:
+    We want to prove that:
     \begin{itemize}
         % \item le definizioni date di $New^k$ e $Reach^k$ sono sound;
-        \item l'algoritmo termina sempre;
+        \item the algorithm always terminates;
         \item $Reach^k \subseteq Inv\ \forall k$ se l'algoritmo ritorna true;
-        \item $\exists k \mbox{ s.t. } Reach^k \cap NotInv \neq \varnothing$ se l'algoritmo ritorna false.
+        \item if the algorithm returns true, then $Reach^k \subseteq Inv\ \forall k$;
+        \item if the algorithm returns false, then $\exists k \mbox{ s.t. } Reach^k \cap NotInv \neq \varnothing$.
     \end{itemize}
 
     % \paragraph{Soundness of definitions}
@@ -186,20 +185,20 @@ end function
     %     Post(New^k) \setminus Reach^k = (Reach^k \cup New^k) \setminus Reach^k 
     % \end{numcases}
 
-    \paragraph{Terminazione}
-    Dimostriamo che l'algoritmo termina sempre ritornando True o False.
-
-    Sappiamo che $\mathbb U$ è finito, perché ogni 
+    \paragraph{Termination}
+    We prove that the algorithm always terminates returning True or False.
     
-    stato è una combinazione di un numero finito e costante di variabili, che possono assumere un numero finito di valori.
-    Inoltre, $\exists n$ tale per cui:
+    We know that $\mathbb U$ is finite, because every state is a combination of a finite and constant number of variables, which can assume a finite number of values.
+
+    Furthermore, $\exists n$ such that:
     $$
     \begin{cases}
-          Reach^k \subset Reach^{k+1} & \forall k < n \\
-          Reach^k = Reach^{k+1} & \forall k \geq n
+          New^k \subset New^{k+1} & \forall k < n \\
+          New^k = New^{k+1} & \forall k \geq n
     \end{cases}
     $$
-    Il motivo per cui è necessaria l'esistenza di tale $n$ è che la serie $(Reach^k)_k$ è crescente (per definizione di $Reach$), discreta (trattandosi di insiemi) e limitata superiormente (poiché $Reach^k \subseteq \mathbb U\ \forall k$).
+
+    Such $n$ must exist because the sequence $(Reach^k)_k$ is increasing (by definition of $Reach$), discrete (because it is a sequence of sets) and bounded above (because $Reach^k \subseteq \mathbb U\ \forall k$).
     
     Di conseguenza, per la definizione di $New$, avremo che $\exists n$ tale che $New^{k+1} = Reach^{k+1} \setminus Reach^k = \varnothing\ \forall k \geq n$.
 
