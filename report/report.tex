@@ -251,23 +251,23 @@ end function
     È banale vedere che l'unico caso in cui l'algoritmo ritorna false è quando all'iterazione $k$ si verifica la condizione $New^k \cap NotInv \neq \varnothing$.
     
     \section{Counterexample search}
-    \subsection{Idea di base}
-    Durante la ricerca degli stati raggiungibili, ad ogni iterazione viene memorizzato l'insieme $New$ in una lista.
-    Se a una certa iterazione $New \cap NotInv = \varnothing$, invece di aggiungere in coda alla lista $New$ aggiungiamo $New \cap NotInv$, ovvero gli stati che non rispettano l'invariante.
-    A partire da questa lista costruiamo ricorsivamente la trace degli stati che portano il sistema a non rispettare l'invariante nel seguente modo:
+    \subsection{Intuitive idea}
+    On every iteration of the reachable states search, the $New$ set is stored in a list.
+    If $New \cap NotInv = \varnothing$ for a specific iteration, $New \cap NotInv$ is added to the list, that is the set of states in which the invariant is not satisfied, instead of $New$.
+    The trace of states that leads the system not to satisy the invariant is recursively built using the list, following this procedure:
     \begin{itemize}
-        \item \textbf{Caso base:} Se la lista ha un solo elemento E, ritorno uno stato qualsiasi in E;
-        \item \textbf{Caso Induttivo:} Altrimenti, 
+        \item \textbf{Base case:} If the list only contains an element E, return one out of any the states in E;
+        \item \textbf{Recursive case:} Otherwise:
         \begin{enumerate}
-            \item estrae dalla lista l'ultimo elemento \texttt{sym\_target};
-            \item sceglie uno stato qualsiasi in \texttt{sym\_target} che chiamiamo \texttt{target};
-            \item modifica il nuovo ultimo elemento della lista restringendolo in modo tale che da ogni suo elemento sia raggiungibile \texttt{target} in una iterazione;
-            \item invoca ricorsivamente sulla lista modificata e concatena il risutato con \texttt{target}.
+            \item pick the last element \texttt{sym\_target} and remove it from the list;
+            \item choose \texttt{target} out of any of the states in \texttt{sym\_target};
+            \item reduce the states in the last element of the list in a way such that \texttt{target} is reachable from each state in it in a single iteration;
+            \item recursively invoke the procedure with on the modified list and concatenate the result with \texttt{target}.
         \end{enumerate}
     \end{itemize}
 
-    Questo algoritmo consente di poter sempre scegliere un elemento qualsiasi nella regione in coda alla lista.
-    La modifica all'ultimo elemento prima della ricorsione serve a garantire il mantenimento di questa proprietà.
+    This algorithm allows to always choose one out of any element in the region placed in the list tail.
+    The procedure step in which the last element of the list is modified before the recursive step is needed in order to keep this property valid.
 
     \begin{figure}[H] 
         \centering
