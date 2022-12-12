@@ -4,7 +4,7 @@
 \usepackage{graphicx}
 \graphicspath{ {immagini/} }
 
-% \usepackage{titling}
+\usepackage{titling}
 
 \usepackage{hyperref}
 \hypersetup{
@@ -31,20 +31,17 @@
 % \usepackage[defaultmono]{droidsansmono}
 % \usepackage[T1]{fontenc}
 
-% \pretitle{%
-%   \begin{center}
-%   \LARGE
-%   \includegraphics[width=6cm]{logo-unipd}\\[\bigskipamount]
-% }
-% \posttitle{\end{center}}
+\pretitle{%
+  \begin{center}
+  \LARGE
+  \includegraphics[width=6cm]{logo-unipd} \\ [\bigskipamount]
+}
+\posttitle{\end{center}}
 
 \title{\textbf{Università di Padova \\ Formal Methods for Cyber-Physical Systems project report}}
-\author{Alberto Lazari - 1216747 \\}
-\date{Giugno 2022 - A.A. 2021-2022}
+\author{Alberto Lazari - 2089120 \\ Elia Scandaletti - 2087934 \\ Francesco Protopapa - 2079466 \\}
+\date{December 2022 - A.Y. 2022-2023}
 
-\renewcommand*\contentsname{Indice}
-
-%TODO tradurre in inglese
 \begin{document}
     \maketitle
     \pagebreak
@@ -253,23 +250,22 @@ end function
     È banale vedere che l'unico caso in cui l'algoritmo ritorna false è quando all'iterazione $k$ si verifica la condizione $New^k \cap NotInv \neq \varnothing$.
     
     \section{Counterexample search}
-    \subsection{Idea di base}
-    Durante la ricerca degli stati raggiungibili, ad ogni iterazione viene memorizzato l'insieme $New$ in una lista.
-    Se a una certa iterazione $New \cap NotInv = \varnothing$, invece di aggiungere in coda alla lista $New$ aggiungiamo $New \cap NotInv$, ovvero gli stati che non rispettano l'invariante.
-    A partire da questa lista costruiamo ricorsivamente la trace degli stati che portano il sistema a non rispettare l'invariante nel seguente modo:
+    \subsection{Intuitive idea}
+    On every iteration of the reachable states search, the $New$ set is stored in a list.
+    If $New \cap NotInv = \varnothing$ for a specific iteration, $New \cap NotInv$ is added to the list, that is the set of states in which the invariant is not satisfied, instead of $New$.
+    The trace of states that leads the system not to satisy the invariant is recursively built using the list, following this procedure:
     \begin{itemize}
-        \item \textbf{Caso base:} Se la lista ha un solo elemento E, ritorno uno stato qualsiasi in E;
-        \item \textbf{Caso Induttivo:} Altrimenti, 
+        \item \textbf{Base case:} If the list only contains an element E, return one out of any the states in E;
+        \item \textbf{Recursive case:} Otherwise:
         \begin{enumerate}
-            \item estrae dalla lista l'ultimo elemento \texttt{sym\_target};
-            \item sceglie uno stato qualsiasi in \texttt{sym\_target} che chiamiamo \texttt{target};
-            \item modifica il nuovo ultimo elemento della lista restringendolo in modo tale che da ogni suo elemento sia raggiungibile \texttt{target} in una iterazione;
-            \item invoca ricorsivamente sulla lista modificata e concatena il risutato con \texttt{target}.
+            \item pick the last element \texttt{sym\_target} and remove it from the list;
+            \item choose \texttt{target} out of any of the states in \texttt{sym\_target};
+            \item reduce the states in the last element of the list in a way such that \texttt{target} is reachable from each state in it in a single iteration;
+            \item recursively invoke the procedure with on the modified list and concatenate the result with \texttt{target}.
         \end{enumerate}
     \end{itemize}
-
-    Questo algoritmo consente di poter sempre scegliere un elemento qualsiasi nella regione in coda alla lista.
-    La modifica all'ultimo elemento prima della ricorsione serve a garantire il mantenimento di questa proprietà.
+    This algorithm allows to always choose one out of any element in the region placed in the list tail.
+    The procedure step in which the last element of the list is modified before the recursive step is needed in order to keep this property valid.
 
     \begin{figure}[H] 
         \centering
@@ -277,8 +273,8 @@ end function
         \caption{Diagram representing the backtrace creation process.}
     \end{figure}
 
-    \subsection{Implementazione}
-    Di seguito viene riportato lo pseudocodice dell'algoritmo per creare la tracce degli stati che portano il sistema a non rispettare l'invariante:
+    \subsection{Implementation}
+    Here is the pseudocode for the trace creation algorithm:
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||, linenos]{python}
 function CreateTrace(SymTrace)
     if len(SymTrace) == 0 return []
@@ -292,7 +288,7 @@ function CreateTrace(SymTrace)
     return Trace
 end function
     \end{minted}
-    Considerando Trace la lista di stati ottentua dalla funzione precedente, per ottenere gli input che portano il sistema da uno stato presente in Trace al successivo, basta utilizzare la funzione \mintinline{python}{GetInputsBetweenStates(State1, State2)} ed applicarla ad ogni coppia di stati adiacenti nella lista.
+    Let $Trace$ be the state list obtained from the \mintinline{python}{CreateTrace(SymTrace)} function. To get the inputs that lead the system from a state in $Trace$ to its successor, it is possible to apply the function \mintinline{python}{GetInputsBetweenStates(State1, State2)} on two adjacent states in the list.
     
     \subsection{Dimostrazione di correttezza}
     \begin{itemize}
