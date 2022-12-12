@@ -265,7 +265,6 @@ end function
             \item recursively invoke the procedure with on the modified list and concatenate the result with \texttt{target}.
         \end{enumerate}
     \end{itemize}
-
     This algorithm allows to always choose one out of any element in the region placed in the list tail.
     The procedure step in which the last element of the list is modified before the recursive step is needed in order to keep this property valid.
 
@@ -275,8 +274,8 @@ end function
         \caption{Diagram representing the backtrace creation process.}
     \end{figure}
 
-    \subsection{Implementazione}
-    Di seguito viene riportato lo pseudocodice dell'algoritmo per creare la tracce degli stati che portano il sistema a non rispettare l'invariante:
+    \subsection{Implementation}
+    Here is the pseudocode for the trace creation algorithm:
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||, linenos]{python}
 function CreateTrace(SymTrace)
     if len(SymTrace) == 0 return []
@@ -290,7 +289,7 @@ function CreateTrace(SymTrace)
     return Trace
 end function
     \end{minted}
-    Considerando Trace la lista di stati ottentua dalla funzione precedente, per ottenere gli input che portano il sistema da uno stato presente in Trace al successivo, basta utilizzare la funzione \mintinline{python}{GetInputsBetweenStates(State1, State2)} ed applicarla ad ogni coppia di stati adiacenti nella lista.
+    Let $Trace$ be the state list obtained from the \mintinline{python}{CreateTrace(SymTrace)} function. To get the inputs that lead the system from a state in $Trace$ to its successor, it is possible to apply the function \mintinline{python}{GetInputsBetweenStates(State1, State2)} on two adjacent states in the list.
     
     \subsection{Dimostrazione di correttezza}
     \begin{itemize}
