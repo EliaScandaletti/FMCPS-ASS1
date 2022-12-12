@@ -196,58 +196,62 @@ end function
     $$
 
     Such $n$ must exist because the sequence $(Reach^k)_k$ is increasing (by definition of $Reach$), discrete (because it is a sequence of sets) and bounded above (because $Reach^k \subseteq \mathbb U\ \forall k$).
-    
-    Di conseguenza, per la definizione di $New$, avremo che $\exists n$ tale che $New^{k+1} = Reach^{k+1} \setminus Reach^k = \varnothing\ \forall k \geq n$.
 
-    Ciò significa che in al più $n$ iterazioni, l'algoritmo esce dal ciclo principale e quando lo fa ritorna True. 
+    As a consequence, by definition of $New$, $\exists n$ such that $New^{k+1} = \varnothing\ \forall k \geq n$.
 
-    \paragraph{Assenza di falsi positivi}
-    Dimostriamo di seguito che $Reach^k \subseteq Inv\ \forall k$ se l'algoritmo ritorna true.
+    It follows that the algorithm exit the main loop after at most $n$ iterations and when it does, it returns True.
 
-    È banale vedere che se l'algoritmo ritorna true, allora il ciclo while è terminato dopo $k$ iterazioni perché $New^k = \varnothing$ e in ogni iterazione precedente non si è entrati nella condizione di riga 6. Ovvero, $New^{k'} \cap NotInv = \varnothing\ \forall k' < k$.
-    Inoltre, $New^k = \varnothing \subseteq Inv$.
+    \paragraph{Absense of false positives}
 
-    Di conseguenza è possibile affermare che se l'algoritmo ritorna true allora $New^{k'} \subseteq Inv\ \forall k' \leq k$.
+    We will prove that $Reach^k \subseteq Inv\ \forall k$ if the algorithm returns true.
 
-    Procediamo ora per induzione su $k$ per dimostrare che 
+    It is trivial to see that if the algorithm returns true, then the while loop terminates after $k$ iterations because $New^k = \varnothing$ and in every previous iteration we did not enter the condition on line 6 ($New^{k'} \cap NotInv = \varnothing\ \forall k' < k$).
+    Furthermore, $New^k = \varnothing \subseteq Inv$.
+
+    Therefore, it is possible to say that if the algorithm returns true then $New^{k'} \subseteq Inv\ \forall k' \leq k$.
+
+    By induction on $k$ we prove that
     \begin{equation}\label{th:true:tesi}
         New^{k'} \subseteq Inv\ \forall k' \leq k \implies Reach^k \subseteq Inv
     \end{equation}
     
-    \subparagraph*{Caso base:}
-    Per $k = 0$ abbiamo $Reach^0 = Init = New^0$ per le definizioni di $Reach$ e $New$. Di conseguenza, $New^0 \subseteq Inv \implies Reach^0 \subseteq Inv$ è trivially true.
+    \subparagraph*{Base case:}
 
-    \subparagraph*{Caso induttivo ($k+1$):}
-    Vogliamo dimostrare induttivamente che
+    if $k = 0$ then $Reach^0 = Init = New^0$ by definition of $Reach$ and $New$. Therefore, $New^0 \subseteq Inv \implies Reach^0 \subseteq Inv$ is trivially true.
+
+    \subparagraph*{Inductive case ($k+1$):}
+
+    We want to inductively prove that:
     \begin{equation}\label{th:true:ind:tesi}
         New^{k'} \subseteq Inv\ \forall k' \leq k+1 \implies Reach^{k+1} \subseteq Inv
     \end{equation}
-    Possiamo assumere che $New^{k'} \subseteq Inv\ \forall k' \leq k+1$, altrimenti la parte sinistra di (\ref{th:true:ind:tesi}) è falsa e, di conseguenza, il caso induttivo è trivialmente vero.
+    We can assume that $New^{k'} \subseteq Inv\ \forall k' \leq k+1$, otherwise the left part of (\ref{th:true:ind:tesi}) is false and, therefore, the inductive case is trivially true.
 
-    Vogliamo dunque dimostrare $Reach^{k+1} \subseteq Inv$ assumendo
+    So we want to prove $Reach^{k+1} \subseteq Inv$ assuming that:
     \begin{numcases}{}
-        New^{k'} \subseteq Inv\ \forall k' \leq k+1 & \mbox{per quanto appena detto} \label{th:true:ind:ass_1} \\
-        New^{k'} \subseteq Inv\ \forall k' \leq k \implies Reach^k \subseteq Inv & \mbox{per ipotesi induttiva} \label{th:true:ind:hp_ind} \\
-        Reach^{k+1} = Reach^{k} \cup New^{k+1} & \mbox{per definizione di $New$} \label{th:true:ind:def_new}
+        New^{k'} \subseteq Inv\ \forall k' \leq k+1 & \mbox{as just said} \label{th:true:ind:ass_1} \\
+        New^{k'} \subseteq Inv\ \forall k' \leq k \implies Reach^k \subseteq Inv & \mbox{by inductive hypothesis} \label{th:true:ind:hp_ind} \\
+        Reach^{k+1} = Reach^{k} \cup New^{k+1} & \mbox{by definition of $New$} \label{th:true:ind:def_new}
     \end{numcases}
 
-    È banale osservare che da (\ref{th:true:ind:ass_1}) seguono
+    It is trivial to see that from (\ref{th:true:ind:ass_1}) follows
     \begin{numcases}{}
         New^{k'} \subseteq Inv\ \forall k' \leq k \label{th:true:ind:hp_ind:left} \\
         New^{k+1} \subseteq Inv \label{th:true:ind:new}
     \end{numcases}
 
-    La (\ref{th:true:ind:hp_ind}) e la (\ref{th:true:ind:hp_ind:left}) implicano
+    (\ref{th:true:ind:hp_ind}) and (\ref{th:true:ind:hp_ind:left}) imply that
     \begin{equation}\label{th:true:ind:hp_ind:right}
         Reach^k \subseteq Inv
     \end{equation}
 
-    Infine, dalla (\ref{th:true:ind:def_new}), la (\ref{th:true:ind:new}) e la (\ref{th:true:ind:hp_ind:right}) segue la tesi induttiva (\ref{th:true:ind:tesi}).
-    
-    \paragraph{Assenza di falsi negativi}
-    Dimostriamo di seguito che se l'algoritmo ritorna false allora $\exists k \mbox{ s.t. } Reach^k \cap NotInv \neq \varnothing$.
+    Finally, from (\ref{th:true:ind:def_new}), (\ref{th:true:ind:new}) and (\ref{th:true:ind:hp_ind:right}) follows the inductive thesis (\ref{th:true:ind:tesi}).
 
-    È banale vedere che l'unico caso in cui l'algoritmo ritorna false è quando all'iterazione $k$ si verifica la condizione $New^k \cap NotInv \neq \varnothing$.
+    
+    \paragraph{Absense of false negatives}
+    We prove that if the algorithm returns false, then $\exists k \mbox{ s.t. } Reach^k \cap NotInv \neq \varnothing$.
+
+    It is trivial to see that the only case in which the algorithm returns false is when at iteration $k$ the condition $New^k \cap NotInv \neq \varnothing$ is verified.
     
     \section{Counterexample search}
     \subsection{Intuitive idea}
@@ -290,16 +294,16 @@ end function
     \end{minted}
     Let $Trace$ be the state list obtained from the \mintinline{python}{CreateTrace(SymTrace)} function. To get the inputs that lead the system from a state in $Trace$ to its successor, it is possible to apply the function \mintinline{python}{GetInputsBetweenStates(State1, State2)} on two adjacent states in the list.
     
-    \subsection{Dimostrazione di correttezza}
+    \subsection{Proof of correctness}
     \begin{itemize}
-        \item Precondizione:
+        \item Precondition:
         \begin{equation}
             \begin{cases}
                 i \neq j \implies SymTrace[i] \cap SymTrace[j] = \varnothing\ \forall i, j \\
                 SymTrace[i] = R \wedge \exists SymTrace[i+1] \implies SymTrace[i+1] \subseteq Post(R)
             \end{cases}
         \end{equation}
-        \item Postcondizione: La funzione ritorna una lista Trace di stati tali che:
+        \item Postcondition: The function returns a list of states (Trace) that satisfies the following conditions:
         \begin{equation}
             \begin{cases}
                 SymTrace[i] = R \implies Trace[i] \in R \\
@@ -308,27 +312,28 @@ end function
         \end{equation}
     \end{itemize}
 
-    \subparagraph*{Caso base - SymTrace vuota}
-    Ritorniamo una lista vuota che sottisfa trivialmente entrambe le post condizioni.
+    \subparagraph*{Base case - SymTrace is empty}
+    We return an empty list that trivially satisfies both postconditions.
 
-    \subparagraph*{Caso base - SymTrace con un elemento}
-    SymTrace è composta da una sola regione R e ritorniamo una lista composta da uno stato qualsiasi di R.
-    SymTrace[0] = R e Trace[0] $\in$ R.
-    Mentre la seconda postcondizione è trivialmente vera perché Trace ha un solo elemento.
+    \subparagraph*{Base case - SymTrace has only one element}
 
-    \subparagraph*{Caso ricorsivo}
-    SymTrace ha almeno due elementi.
+    SymTrace is made of a single region R and we return a list made of one state in R.
+    SymTrace[0] = R and Trace[0] $\in$ R.
+    The second postcondition is trivially true because Trace has only one element.
+
+    \subparagraph*{Recursive case}
+    SymTrace has at least two elements.
     
-    SymTrace' è il valore originale di SymTrace.
+    SymTrace' is the original value of SymTrace.
 
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
 SymTarget |$\leftarrow$| SymTrace.pop()
 Target |$\leftarrow$| PickOneState(SymTarget)
     \end{minted}
 
-    Target $\in$ SymTrace[-1] per le proprietà della funzione PickOneState.
+    Target $\in$ SymTrace[-1] because of the properties of the PickOneState function.
 
-    SymTrace è SymTrace' privato dell'ultimo elemento
+    SymTrace is equal to SymTrace' without its last element.
      
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
     SymTrace[-1] = SymTrace[-1] |$\cap$| Pre(Target)
@@ -336,11 +341,11 @@ Target |$\leftarrow$| PickOneState(SymTarget)
 
     Target $\in$ Post(\{s\}) $\forall$ s $\in$ SymTrace[-1]
 
-    La precondizione della chiamata ricorsiva è rispettata perché:
+    The precondition of the recursive call is satisfied because:
     \begin{itemize}
-        \item se SymTrace' è una lista di regioni disgiunte allora anche Symtrace[0:-1] = SymTrace'[0:-2] è una lista di regioni disgiunte;
-        inoltre, SymTrace[-1] $\subseteq$ SymTrace'[-2] implica che SymTrace[-1] è disgiunto da tutti gli altri elementi di SymTrace;
-        \item Data la precondizione e dato che $\forall i \mbox{ t.c. } 0 \leq i < SymTrace.size - 1 : SymTrace[i] = Symtrace'[i]\ e\ SymTrace[-1] \subseteq SymTrace'[-2] $, allora
+        \item if SymTrace' is a list of disjoint regions then SymTrace[0:-1] = SymTrace'[0:-2] is a list of disjoint regions;
+        moreover, SymTrace[-1] $\subseteq$ SymTrace'[-2] implies that SymTrace[-1] is disjoint from all the other elements of SymTrace;
+        \item By the precondition and that $\forall i \mbox{ t.c. } 0 \leq i < SymTrace.size - 1 : SymTrace[i] = Symtrace'[i]\ e\ SymTrace[-1] \subseteq SymTrace'[-2] $, then
         \begin{equation}
             \forall i \mbox{ s.t. } 1 \leq i < SymTrace.size, \forall e \in SymTrace[i],  e \in Post(SymTrace[i-1])
         \end{equation}
@@ -350,27 +355,27 @@ Target |$\leftarrow$| PickOneState(SymTarget)
  Trace |$\leftarrow$| CreateTrace(SymTrace)
     \end{minted}
 
-    quindi Trace' = CreateTrace(SymTrace) rispetta la postcondizione di CreateTrace.
+    so Trace' = CreateTrace(SymTrace) respects the postcondition of CreateTrace.
     
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
     Trace |$\leftarrow$| Trace + Target
     \end{minted}
 
-    La Postcondizione è rispettata se:
+    The postcondition is satisfied if:
     \begin{numcases}{}
         SymTrace[i] = R \implies Trace[i] \in R; \label{th:trace:ric:dim-post:1} \\
         \forall i \mbox{ s.t. } 0 \leq i < SymTrace.size - 1, Trace[i+1] \in Post(\{Trace[i]\}). \label{th:trace:ric:dim-post:2}
     \end{numcases}
 
-    (\ref{th:trace:ric:dim-post:1}) è rispettata:
+    (\ref{th:trace:ric:dim-post:1}) is satisfied:
     \begin{itemize}
-        \item per tutti gli elementi tranne l'ultimo, a seguito della postcondizione ricorsiva;
-        \item per l'ultimo elemento di Trace = Target $\in$ SymTrace[-1], perché ottenuto tramite PickOneState(SymTrace[-1]).
+        \item for all the elements of Trace except the last one, because of the postcondition of the recursive call;
+        \item for the last element of Trace = Target $\in$ SymTrace[-1], because obtained by PickOneState(SymTrace[-1]).
     \end{itemize}
 
-    (\ref{th:trace:ric:dim-post:1}) è rispettata:
+    (\ref{th:trace:ric:dim-post:1}) is satisfied:
     \begin{itemize}
-        \item $\forall i \mbox{ s.t. } 0 \leq i < SymTrace.size - 2$ a seguito della postcondizione ricorsiva;
-        \item Trace[-1] = target $\in Post(\{Trace[-2]\})$, perché target è ottenuto tramite PickOneState(SymTrace[-1]) e SymTrace[-1] $\subseteq$ Post(SymTrace[-2]).
+        \item $\forall i \mbox{ s.t. } 0 \leq i < SymTrace.size - 2$ following the recursive call postcondition;
+        \item Trace[-1] = target $\in Post(\{Trace[-2]\})$, because target is obtained by PickOneState(SymTrace[-1]) and SymTrace[-1] $\subseteq$ Post(SymTrace[-2]).
     \end{itemize}
 \end{document}
