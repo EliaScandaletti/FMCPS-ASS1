@@ -77,25 +77,18 @@
     In this way, it is possible to check if the invariant is not verified in some of these states.
     This check can be performed easily if we consider both the reachable region and the invariant as set of states.
 
-    An optimization can be used to avoid calculating all the states if some states that do not satisfy the invariant are found during the process.
+    An optimization can be used to avoid calculating all the reachable states: if some states that do not satisfy the invariant are found during the process, we know the invariant is not satisfied.
 
     In order to do this, a variable $Reach$ is used to represent the reachable states of the system and it is updated iteratively.
-    The basic idea is that at iteration $t$, $Reach$ represents all the states reachable from $Init$ by applying $Trans$ at most $t$ times.
-    The algorithm stops when one of the following conditions is verified, where $NotInv$ is the negation of $Inv$:
+    The basic idea is that, at iteration $t$, $Reach$ is the set including the states that are reachable from $Init$ by applying $Trans$ at most $t$ times.
+    The algorithm terminates when one of the following conditions is verified:
     \begin{enumerate}
         \item $Post(Reach) \subseteq Reach $: we have found all the reachable states;
-        \item $Reach \cap NotInv \neq \emptyset$: we have found some reachable states in which the invariant is not verified.
+        \item $Reach \cap NotInv \neq \emptyset$, where $NotInv$ is the negation of $Inv$: we have found some reachable states in which the invariant is not verified.
     \end{enumerate}
 
-    \begin{figure}[H] 
-        \centering
-        \includegraphics[width=0.6\textwidth]{reach-diagram.png}
-        \caption{Reach algorithm diagram.}
-        \label{fig:reach_diagram}
-    \end{figure}
-
     \subsection{Implementation}
-    The implementation of the algorithm in pseudocode is the following:
+    The pseudocode implementation of the algorithm is the following:
 
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||, linenos]{python}
 function IsInvariantRespected(Init, Trans, Inv)
@@ -122,6 +115,13 @@ end function
         \item $A \setminus B$ becomes: \mintinline{python}{A - B}
         \item $A \cup B$ becomes: \mintinline{python}{A + B}
     \end{itemize}
+
+    \begin{figure}[H] 
+        \centering
+        \includegraphics[width=0.6\textwidth]{reach-diagram.png}
+        \caption{Diagram representing of the algorithm finding a reachable region not satisfying the invariant.}
+        \label{fig:reach_diagram}
+    \end{figure}
 
     \subsection{Proof of correctness}
     Let:
@@ -221,7 +221,7 @@ end function
     Such $n$ must exist because the sequence $(Reach^k)_k$ is increasing (by definition of $Reach$), discrete (because it is a sequence of sets) and bounded above (because $Reach^k \subseteq \mathbb U\ \forall k$).
 
     \noindent
-    As a consequence, by definition of $New$, $\exists\ n$ such that $New^{k+1} = \varnothing\ \forall k \geq n$.
+    As a consequence, by definition of $New$, $\exists\ n$ s.t. $New^{k+1} = Reach^{k+1} \setminus Reach^k = \varnothing\ \forall k \geq n$.
 
     \noindent
     It follows that the algorithm exits the main loop after at most $n$ iterations.
