@@ -1,2 +1,2 @@
-/usr/local/bin/python3 inv_mc.py $* > our.out
-/usr/local/bin/python3 inv_mc_original.py $* > original.out
+/usr/local/bin/python3 inv_mc.py $* >> our.out
+/usr/local/bin/python3 inv_mc_original.py $* >> original.out

@@ -64,21 +64,8 @@ def check_explain_inv_spec(spec):
     and ending with a state. States and inputs are represented by dictionaries
     where keys are state and inputs variable of the loaded SMV model, and values
     are their value.
-
-    function SymbolicReachable(Init, Trans, Inv)
-        Reach ← Init
-        New ← Init
-        while not IsEmpty(New) do
-            if not IsEmpty(Intersect(New, Not(Inv))) then
-                return False
-            end if
-            New ← Diff(Post(New,Trans), Reach)
-            Reach ← Union(Reach, New)
-        end while
-        return True
-    end function
     """
-
+    # Useful operators on pynusmv BDDs
     # a + b and a | b compute the disjunction of a and b
     # a * b and a & b compute the conjunction of a and b
     # ~a and -a compute the negation of a
