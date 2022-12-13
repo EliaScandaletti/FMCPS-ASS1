@@ -46,10 +46,10 @@
     \maketitle
     \pagebreak
 
-    % \tableofcontents
-    % \pagebreak
+    \tableofcontents
+    \pagebreak
 
-    \section{Notazione}
+    \section{Notation}
     \begin{description}
         \item $Post$: function which represents the set of states reachable from a given region by applying a single step of transition;
         \item $Pre$: function which represents the set of states from which a given state can be reached by applying a single step of transition;
@@ -89,7 +89,7 @@
 
     \begin{figure}[H] 
         \centering
-        \includegraphics[width=\textwidth]{reach-diagram.png}
+        \includegraphics[width=0.6\textwidth]{reach-diagram.png}
         \caption{Reach algorithm diagram.}
         \label{fig:reach_diagram}
     \end{figure}
@@ -112,7 +112,6 @@ function IsInvariantRespected(Init, Trans, Inv)
     return True
 end function
     \end{minted}
-
     For the Python implementation, it is sufficient to translate the following instructions:
     \begin{itemize}
         \item $A \leftarrow B$ becomes: \mintinline{python}{A = B}
@@ -146,7 +145,8 @@ end function
         $$
     \end{itemize}
     $Reach^k$ and $New^k$ correspond to the values taken by the variables \texttt{Reach} and \texttt{New} at the $k$-th iteration.
-
+    
+    \noindent
     We want to prove that:
     \begin{itemize}
         % \item le definizioni date di $New^k$ e $Reach^k$ sono sound;
@@ -206,9 +206,11 @@ end function
 
     \paragraph{Termination}
     We prove that the algorithm always terminates returning true or false.
-    
+   
+    \noindent
     We know that $\mathbb U$ is finite, because every state is a combination of a finite and constant number of variables, which can assume a finite number of values.
 
+    \noindent
     Therefore, $\exists\ n$ such that:
     $$
     \begin{cases}
@@ -216,59 +218,58 @@ end function
           Reach^k = Reach^{k+1} & \forall k \geq n
     \end{cases}
     $$
-
     Such $n$ must exist because the sequence $(Reach^k)_k$ is increasing (by definition of $Reach$), discrete (because it is a sequence of sets) and bounded above (because $Reach^k \subseteq \mathbb U\ \forall k$).
 
+    \noindent
     As a consequence, by definition of $New$, $\exists\ n$ such that $New^{k+1} = \varnothing\ \forall k \geq n$.
 
+    \noindent
     It follows that the algorithm exits the main loop after at most $n$ iterations.
 
     \paragraph{Absence of false positives}
-
     We will prove that $Reach^k \subseteq Inv\ \forall k$ if the algorithm returns true.
 
+    \noindent
     It is trivial to see that if the algorithm returns true, then the while loop terminates after $k$ iterations because $New^k = \varnothing$ and in every previous iteration we did not enter the condition on line 6 ($New^{k'} \cap NotInv = \varnothing\ \forall k' < k$).
 
-    Note that $New^k = \varnothing \subseteq Inv$.
-    Therefore, we can say that if the algorithm returns true then $New^{k'} \subseteq Inv\ \forall k' \leq k$.
+    \noindent
+    Note that $New^k = \varnothing \subseteq Inv$, therefore, we can say that if the algorithm returns true then $New^{k'} \subseteq Inv\ \forall k' \leq k$.
 
+    \noindent
     By induction on $k$ we prove that
     \begin{equation}\label{th:true:tesi}
         New^{k'} \subseteq Inv\ \forall k' \leq k \implies Reach^k \subseteq Inv
     \end{equation}
     
     \subparagraph*{Base case:}
-
     If $k = 0$ then $Reach^0 = Init = New^0$ by definition of $Reach$ and $New$. Therefore, $New^0 \subseteq Inv \implies Reach^0 \subseteq Inv$ is trivially true.
 
     \subparagraph*{Inductive case ($k+1$):}
-
     We want to prove that:
     \begin{equation}\label{th:true:ind:tesi}
         New^{k'} \subseteq Inv\ \forall k' \leq k+1 \implies Reach^{k+1} \subseteq Inv
     \end{equation}
     We can assume that $New^{k'} \subseteq Inv\ \forall k' \leq k+1$, otherwise the left part of (\ref{th:true:ind:tesi}) is false and, therefore, the inductive case is vacuously true.
 
+    \noindent
     So we want to prove $Reach^{k+1} \subseteq Inv$ assuming that:
     \begin{numcases}{}
         New^{k'} \subseteq Inv\ \forall k' \leq k+1 & \mbox{as just said} \label{th:true:ind:ass_1} \\
         New^{k'} \subseteq Inv\ \forall k' \leq k \implies Reach^k \subseteq Inv & \mbox{by inductive hypothesis} \label{th:true:ind:hp_ind} \\
         Reach^{k+1} = Reach^{k} \cup New^{k+1} & \mbox{from the definition of $New$} \label{th:true:ind:def_new}
     \end{numcases}
-
     It is trivial to see that from (\ref{th:true:ind:ass_1}) follows:
     \begin{numcases}{}
         New^{k'} \subseteq Inv\ \forall k' \leq k \label{th:true:ind:hp_ind:left} \\
         New^{k+1} \subseteq Inv \label{th:true:ind:new}
     \end{numcases}
-
     Also, (\ref{th:true:ind:hp_ind}) and (\ref{th:true:ind:hp_ind:left}) imply that
     \begin{equation}\label{th:true:ind:hp_ind:right}
         Reach^k \subseteq Inv
     \end{equation}
-
     Finally, from (\ref{th:true:ind:def_new}), (\ref{th:true:ind:new}) and (\ref{th:true:ind:hp_ind:right}) follows the inductive thesis (\ref{th:true:ind:tesi}).
 
+    \noindent
     Therefore, we can conclude that if the algorithm returns true, then $Reach^k \subseteq Inv\ \forall k$.
     
     \paragraph{Absence of false negatives}
@@ -301,7 +302,7 @@ end function
         \caption{Diagram representing the backtrace creation process.}
         \label{fig:back_trace}
     \end{figure}
-    
+
     Fig.\ref{fig:back_trace} represents graphically this algorithm:
     \begin{itemize}
         \item red arrows represent the $Post$ function;
@@ -361,16 +362,20 @@ end function
     Target |$\leftarrow$| PickOneState(SymTarget)
     \end{minted}
 
+    \noindent
     $Target \in SymTrace[-1]$ because of the properties of the \texttt{PickOneState} function.
 
+    \noindent
     $SymTrace$ is equal to $SymTrace'$ without its last element.
      
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
     SymTrace[-1] = SymTrace[-1] |$\cap$| Pre(Target)
     \end{minted}
 
+    \noindent
     $Target \in Post(\{s\}) \forall s \in SymTrace[-1]$ because of the properties of the $Pre$ function.
 
+    \noindent
     The precondition of the recursive call is satisfied because:
     \begin{itemize}
         \item if $SymTrace'$ is a list of disjoint regions then $SymTrace[0:-1] = SymTrace'[0:-2]$ is a list of disjoint regions;
@@ -385,12 +390,14 @@ end function
  Trace |$\leftarrow$| CreateTrace(SymTrace)
     \end{minted}
 
+    \noindent
     Therefore $Trace' = \mathtt{CreateTrace}(SymTrace)$ respects the recursive post-condition.
     
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
     Trace |$\leftarrow$| Trace + Target
     \end{minted}
 
+    \noindent
     The post-condition is satisfied if:
     \begin{numcases}{}
         SymTrace[i] = R \implies Trace[i] \in R; \label{th:trace:ric:dim-post:1} \\
@@ -408,7 +415,6 @@ end function
         \item for all the elements of $Trace$ except the last one, because of the recursive post-condition;
         \item for the last element of $Trace$, namely $Target$, because it is obtained by \texttt{PickOneState} on $SymTrace'[-1]$ and $SymTrace'[-1] \subseteq Post(SymTrace'[-2])$ for the pre-condition.        
     \end{itemize}
-
     Therefore, we can conclude that the algorithm that looks for the counterexample is correct.
 
     \subsection{Inputs between states}
