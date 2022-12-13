@@ -46,13 +46,19 @@
     \maketitle
     \pagebreak
 
-    \tableofcontents
-    \pagebreak
+    % \tableofcontents
+    % \pagebreak
 
     \section{Notazione}
     \begin{description}
         \item $Post$: function which represents the set of states reachable from a given region by applying a single step of transition;
-        \item $List[i]$: elemento di una lista $List$ di indice $Size(List) - i, i \in \mathbb N$.
+        \item $Pre$: function which represents the set of states from which a given state can be reached by applying a single step of transition;
+        \item $List[i]$: element of list $List$ of index $
+        \begin{cases}
+            i, \mbox{if } i \geq 0 \\
+             Size(List) + i, \mbox{if } i < 0
+        \end{cases}, i \in \mathbb N$;
+        \item $List[i:j]$: sublist of $List$ from index $i$ (included) to index $j$ (excluded). 
     \end{description}
 
     \section{Structure of the report}
@@ -65,13 +71,17 @@
 
     \section{Invariant Satisfiability}
     \subsection{Intuitive idea}
-    Given a region of initial states $Init$, a transition function $Trans$ and an invariant $Inv$, the goal of this algorithm is to decide if $Inv$ is verified in all the reachable states starting from $Init$ by applying $Trans$.
+    Given a region of initial states $Init$, a transition function $Trans$ and an invariant $Inv$, the goal of the algorithm is to decide if $Inv$ is verified in all the reachable states starting from $Init$ by applying $Trans$.
 
-    To achieve this goal, a symbolic representation of all and only the reachable states of the system needs to be found. In this way, it is easy to check if the invariant is not verified in some of these states. An optimization can be used to avoid calculating all the states if some states that do not satisfy the invariant are found during the process.
+    To achieve this goal, a symbolic representation of all and only the reachable states of the system needs to be found.
+    In this way, it is possible to check if the invariant is not verified in some of these states.
+    This check can be performed easily if we consider both the reachable region and the invariant as set of states.
+
+    An optimization can be used to avoid calculating all the states if some states that do not satisfy the invariant are found during the process.
 
     In order to do this, a variable $Reach$ is used to represent the reachable states of the system and it is updated iteratively.
     The basic idea is that at iteration $t$, $Reach$ represents all the states reachable from $Init$ by applying $Trans$ at most $t$ times.
-    The algorithm stops when one of the following conditions is verified:
+    The algorithm stops when one of the following conditions is verified, where $NotInv$ is the negation of $Inv$:
     \begin{enumerate}
         \item $Post(Reach) \subseteq Reach $: we have found all the reachable states;
         \item $Reach \cap NotInv \neq \emptyset$: we have found some reachable states in which the invariant is not verified.
@@ -130,15 +140,14 @@ end function
             \end{cases}
         $$
     \end{itemize}
-    This way, $Reach^k$ and $New^k$ correspond to the values taken by the variables \texttt{Reach} and \texttt{New} at the $k$-th iteration.
+    $Reach^k$ and $New^k$ correspond to the values taken by the variables \texttt{Reach} and \texttt{New} at the $k$-th iteration.
 
     We want to prove that:
     \begin{itemize}
         % \item le definizioni date di $New^k$ e $Reach^k$ sono sound;
         \item the algorithm always terminates;
-        \item $Reach^k \subseteq Inv\ \forall k$ se l'algoritmo ritorna true;
         \item if the algorithm returns true, then $Reach^k \subseteq Inv\ \forall k$;
-        \item if the algorithm returns false, then $\exists k \mbox{ s.t. } Reach^k \cap NotInv \neq \varnothing$.
+        \item if the algorithm returns false, then $\exists\ k \mbox{ s.t. } Reach^k \cap NotInv \neq \varnothing$.
     \end{itemize}
 
     % \paragraph{Soundness of definitions}
@@ -191,32 +200,32 @@ end function
     % \end{numcases}
 
     \paragraph{Termination}
-    We prove that the algorithm always terminates returning True or False.
+    We prove that the algorithm always terminates returning true or false.
     
     We know that $\mathbb U$ is finite, because every state is a combination of a finite and constant number of variables, which can assume a finite number of values.
 
-    Furthermore, $\exists n$ such that:
+    Therefore, $\exists\ n$ such that:
     $$
     \begin{cases}
-          New^k \subset New^{k+1} & \forall k < n \\
-          New^k = New^{k+1} & \forall k \geq n
+          Reach^k \subset Reach^{k+1} & \forall k < n \\
+          Reach^k = Reach^{k+1} & \forall k \geq n
     \end{cases}
     $$
 
     Such $n$ must exist because the sequence $(Reach^k)_k$ is increasing (by definition of $Reach$), discrete (because it is a sequence of sets) and bounded above (because $Reach^k \subseteq \mathbb U\ \forall k$).
 
-    As a consequence, by definition of $New$, $\exists n$ such that $New^{k+1} = \varnothing\ \forall k \geq n$.
+    As a consequence, by definition of $New$, $\exists\ n$ such that $New^{k+1} = \varnothing\ \forall k \geq n$.
 
-    It follows that the algorithm exit the main loop after at most $n$ iterations and when it does, it returns True.
+    It follows that the algorithm exits the main loop after at most $n$ iterations.
 
-    \paragraph{Absense of false positives}
+    \paragraph{Absence of false positives}
 
     We will prove that $Reach^k \subseteq Inv\ \forall k$ if the algorithm returns true.
 
     It is trivial to see that if the algorithm returns true, then the while loop terminates after $k$ iterations because $New^k = \varnothing$ and in every previous iteration we did not enter the condition on line 6 ($New^{k'} \cap NotInv = \varnothing\ \forall k' < k$).
-    Furthermore, $New^k = \varnothing \subseteq Inv$.
 
-    Therefore, it is possible to say that if the algorithm returns true then $New^{k'} \subseteq Inv\ \forall k' \leq k$.
+    Note that $New^k = \varnothing \subseteq Inv$.
+    Therefore, we can say that if the algorithm returns true then $New^{k'} \subseteq Inv\ \forall k' \leq k$.
 
     By induction on $k$ we prove that
     \begin{equation}\label{th:true:tesi}
@@ -225,65 +234,75 @@ end function
     
     \subparagraph*{Base case:}
 
-    if $k = 0$ then $Reach^0 = Init = New^0$ by definition of $Reach$ and $New$. Therefore, $New^0 \subseteq Inv \implies Reach^0 \subseteq Inv$ is trivially true.
+    If $k = 0$ then $Reach^0 = Init = New^0$ by definition of $Reach$ and $New$. Therefore, $New^0 \subseteq Inv \implies Reach^0 \subseteq Inv$ is trivially true.
 
     \subparagraph*{Inductive case ($k+1$):}
 
-    We want to inductively prove that:
+    We want to prove that:
     \begin{equation}\label{th:true:ind:tesi}
         New^{k'} \subseteq Inv\ \forall k' \leq k+1 \implies Reach^{k+1} \subseteq Inv
     \end{equation}
-    We can assume that $New^{k'} \subseteq Inv\ \forall k' \leq k+1$, otherwise the left part of (\ref{th:true:ind:tesi}) is false and, therefore, the inductive case is trivially true.
+    We can assume that $New^{k'} \subseteq Inv\ \forall k' \leq k+1$, otherwise the left part of (\ref{th:true:ind:tesi}) is false and, therefore, the inductive case is vacuously true.
 
     So we want to prove $Reach^{k+1} \subseteq Inv$ assuming that:
     \begin{numcases}{}
         New^{k'} \subseteq Inv\ \forall k' \leq k+1 & \mbox{as just said} \label{th:true:ind:ass_1} \\
         New^{k'} \subseteq Inv\ \forall k' \leq k \implies Reach^k \subseteq Inv & \mbox{by inductive hypothesis} \label{th:true:ind:hp_ind} \\
-        Reach^{k+1} = Reach^{k} \cup New^{k+1} & \mbox{by definition of $New$} \label{th:true:ind:def_new}
+        Reach^{k+1} = Reach^{k} \cup New^{k+1} & \mbox{from the definition of $New$} \label{th:true:ind:def_new}
     \end{numcases}
 
-    It is trivial to see that from (\ref{th:true:ind:ass_1}) follows
+    It is trivial to see that from (\ref{th:true:ind:ass_1}) follows:
     \begin{numcases}{}
         New^{k'} \subseteq Inv\ \forall k' \leq k \label{th:true:ind:hp_ind:left} \\
         New^{k+1} \subseteq Inv \label{th:true:ind:new}
     \end{numcases}
 
-    (\ref{th:true:ind:hp_ind}) and (\ref{th:true:ind:hp_ind:left}) imply that
+    Also, (\ref{th:true:ind:hp_ind}) and (\ref{th:true:ind:hp_ind:left}) imply that
     \begin{equation}\label{th:true:ind:hp_ind:right}
         Reach^k \subseteq Inv
     \end{equation}
 
     Finally, from (\ref{th:true:ind:def_new}), (\ref{th:true:ind:new}) and (\ref{th:true:ind:hp_ind:right}) follows the inductive thesis (\ref{th:true:ind:tesi}).
 
+    Therefore, we can conclude that if the algorithm returns true, then $Reach^k \subseteq Inv\ \forall k$.
     
-    \paragraph{Absense of false negatives}
-    We prove that if the algorithm returns false, then $\exists k \mbox{ s.t. } Reach^k \cap NotInv \neq \varnothing$.
+    \paragraph{Absence of false negatives}
+    We want to prove that if the algorithm returns false, then $\exists\ k \mbox{ s.t. } Reach^k \cap NotInv \neq \varnothing$.
 
     It is trivial to see that the only case in which the algorithm returns false is when at iteration $k$ the condition $New^k \cap NotInv \neq \varnothing$ is verified.
+    Therefore, the property holds.
     
-    \section{Counterexample search}
+    \section{Counterexample Search}
     \subsection{Intuitive idea}
     On every iteration of the reachable states search, the $New$ set is stored in a list.
-    If $New \cap NotInv = \varnothing$ for a specific iteration, $New \cap NotInv$ is added to the list, that is the set of states in which the invariant is not satisfied, instead of $New$.
-    The trace of states that leads the system not to satisy the invariant is recursively built using the list, following this procedure:
+    If $New \cap NotInv \neq \varnothing$ for a specific iteration, $New \cap NotInv$ is added to the list, that is a set of reachable states in which the invariant is not satisfied, instead of $New$.
+    The trace of states that leads the system not to satisfy the invariant is recursively built using this list, following this procedure:
     \begin{itemize}
-        \item \textbf{Base case:} If the list only contains an element E, return one out of any the states in E;
+        \item \textbf{Base case:} If the list contains a single region $R$, return one state in $R$;
         \item \textbf{Recursive case:} Otherwise:
         \begin{enumerate}
-            \item pick the last element \texttt{sym\_target} and remove it from the list;
-            \item choose \texttt{target} out of any of the states in \texttt{sym\_target};
-            \item reduce the states in the last element of the list in a way such that \texttt{target} is reachable from each state in it in a single iteration;
-            \item recursively invoke the procedure with on the modified list and concatenate the result with \texttt{target}.
+            \item pick the last element \texttt{sym\_target} of the list and remove it from the list;
+            \item choose a state \texttt{target} in \texttt{sym\_target};
+            \item reduce the last region in the list in such a way that \texttt{target} is reachable from each state in it in a single iteration;
+            \item recursively invoke the procedure on the modified list and concatenate the result with \texttt{target}.
         \end{enumerate}
     \end{itemize}
-    This algorithm allows to always choose one out of any element in the region placed in the list tail.
-    The procedure step in which the last element of the list is modified before the recursive step is needed in order to keep this property valid.
-
+    This algorithm grants that the states in the output list are always just one step apart, regardless of the state chosen in the last region of the list.
+    The procedure step in which the last element of the list is modified is needed in order to keep this property valid.
+    
     \begin{figure}[H] 
         \centering
         \includegraphics[width=\textwidth]{backtrace-diagram.png}
         \caption{Diagram representing the backtrace creation process.}
+        \label{fig:back_trace}
     \end{figure}
+    
+    Fig.\ref{fig:back_trace} represents graphically this algorithm:
+    \begin{itemize}
+        \item red arrows represent the $Post$ function;
+        \item blue arrows represent the $Pre$ function;
+        \item yellow regions represent the reduction applied to the last element of the list.
+    \end{itemize}
 
     \subsection{Implementation}
     Here is the pseudocode for the trace creation algorithm:
@@ -300,7 +319,6 @@ function CreateTrace(SymTrace)
     return Trace
 end function
     \end{minted}
-    Let $Trace$ be the state list obtained from the \mintinline{python}{CreateTrace(SymTrace)} function. To get the inputs that lead the system from a state in $Trace$ to its successor, it is possible to apply the function \mintinline{python}{GetInputsBetweenStates(State1, State2)} on two adjacent states in the list.
     
     \subsection{Proof of correctness}
     \begin{itemize}
@@ -308,82 +326,88 @@ end function
         \begin{equation}
             \begin{cases}
                 i \neq j \implies SymTrace[i] \cap SymTrace[j] = \varnothing\ \forall i, j \\
-                SymTrace[i] = R \wedge \exists SymTrace[i+1] \implies SymTrace[i+1] \subseteq Post(R)
+                SymTrace[i] = R \wedge \exists\ SymTrace[i+1] \implies SymTrace[i+1] \subseteq Post(R)
             \end{cases}
         \end{equation}
-        \item Postcondition: The function returns a list of states (Trace) that satisfies the following conditions:
+        \item Postcondition: The function returns a list of states $Trace$ that satisfies the following conditions:
         \begin{equation}
             \begin{cases}
                 SymTrace[i] = R \implies Trace[i] \in R \\
-                \forall i \mbox{ s.t. } 0 \leq i < SymTrace.size - 1, Trace[i+1] \in Post(\{Trace[i]\})
+                \exists\ Trace[i+1] \implies Trace[i+1] \in Post(\{Trace[i]\})
             \end{cases}
         \end{equation}
     \end{itemize}
 
     \subparagraph*{Base case - SymTrace is empty}
-    We return an empty list that trivially satisfies both postconditions.
+    We return an empty list that vacuously satisfies both post-conditions.
 
     \subparagraph*{Base case - SymTrace has only one element}
 
-    SymTrace is made of a single region R and we return a list made of one state in R.
-    SymTrace[0] = R and Trace[0] $\in$ R.
-    The second postcondition is trivially true because Trace has only one element.
+    $SymTrace$ is made of a single region $R$ and we return a list made of one state in $R$.
+    $SymTrace[0] = R \wedge Trace[0] \in R$.
+    The second post-condition is trivially true because $Trace$ has only one element.
 
     \subparagraph*{Recursive case}
-    SymTrace has at least two elements.
-    
-    SymTrace' is the original value of SymTrace.
+    $SymTrace$ has at least two elements.
+    $SymTrace'$ is the original value of SymTrace.
 
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
-SymTarget |$\leftarrow$| SymTrace.pop()
-Target |$\leftarrow$| PickOneState(SymTarget)
+    SymTarget |$\leftarrow$| SymTrace.pop()
+    Target |$\leftarrow$| PickOneState(SymTarget)
     \end{minted}
 
-    Target $\in$ SymTrace[-1] because of the properties of the PickOneState function.
+    $Target \in SymTrace[-1]$ because of the properties of the \texttt{PickOneState} function.
 
-    SymTrace is equal to SymTrace' without its last element.
+    $SymTrace$ is equal to $SymTrace'$ without its last element.
      
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
     SymTrace[-1] = SymTrace[-1] |$\cap$| Pre(Target)
     \end{minted}
 
-    Target $\in$ Post(\{s\}) $\forall$ s $\in$ SymTrace[-1]
+    $Target \in Post(\{s\}) \forall s \in SymTrace[-1]$ because of the properties of the $Pre$ function.
 
     The precondition of the recursive call is satisfied because:
     \begin{itemize}
-        \item if SymTrace' is a list of disjoint regions then SymTrace[0:-1] = SymTrace'[0:-2] is a list of disjoint regions;
-        moreover, SymTrace[-1] $\subseteq$ SymTrace'[-2] implies that SymTrace[-1] is disjoint from all the other elements of SymTrace;
-        \item By the precondition and that $\forall i \mbox{ t.c. } 0 \leq i < SymTrace.size - 1 : SymTrace[i] = Symtrace'[i]\ e\ SymTrace[-1] \subseteq SymTrace'[-2] $, then
-        \begin{equation}
-            \forall i \mbox{ s.t. } 1 \leq i < SymTrace.size, \forall e \in SymTrace[i],  e \in Post(SymTrace[i-1])
-        \end{equation}
+        \item if $SymTrace'$ is a list of disjoint regions then $SymTrace[0:-1] = SymTrace'[0:-2]$ is a list of disjoint regions;
+        moreover, $SymTrace[-1] \subseteq SymTrace'[-2]$ implies that $SymTrace[-1]$ is disjoint from all the other elements of $SymTrace$;
+        \item By the precondition and given that $SymTrace[0:-1] = Symtrace'[0:-2]$ and $SymTrace[-1] \subseteq SymTrace'[-2] $, then
+        \begin{equation*}
+            \exists\ SymTrace[i+1] \implies \forall e \in SymTrace[i+1], e \in Post(SymTrace[i])
+        \end{equation*}
     \end{itemize}
 
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
  Trace |$\leftarrow$| CreateTrace(SymTrace)
     \end{minted}
 
-    so Trace' = CreateTrace(SymTrace) respects the postcondition of CreateTrace.
+    Therefore $Trace' = \mathtt{CreateTrace}(SymTrace)$ respects the recursive post-condition.
     
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
     Trace |$\leftarrow$| Trace + Target
     \end{minted}
 
-    The postcondition is satisfied if:
+    The post-condition is satisfied if:
     \begin{numcases}{}
         SymTrace[i] = R \implies Trace[i] \in R; \label{th:trace:ric:dim-post:1} \\
-        \forall i \mbox{ s.t. } 0 \leq i < SymTrace.size - 1, Trace[i+1] \in Post(\{Trace[i]\}). \label{th:trace:ric:dim-post:2}
+        \exists\ Trace[i+1] \implies Trace[i+1] \in Post(\{Trace[i]\}) \label{th:trace:ric:dim-post:2}
     \end{numcases}
 
     (\ref{th:trace:ric:dim-post:1}) is satisfied:
     \begin{itemize}
-        \item for all the elements of Trace except the last one, because of the postcondition of the recursive call;
-        \item for the last element of Trace = Target $\in$ SymTrace[-1], because obtained by PickOneState(SymTrace[-1]).
+        \item for all the elements of $Trace$ except the last one, because of the post-condition of the recursive call;
+        \item for the last element of $Trace$, namely $Target \in SymTrace'[-1]$, because obtained by \texttt{PickOneState} on $SymTrace'[-1]$.
     \end{itemize}
 
-    (\ref{th:trace:ric:dim-post:1}) is satisfied:
+    (\ref{th:trace:ric:dim-post:2}) is satisfied:
     \begin{itemize}
-        \item $\forall i \mbox{ s.t. } 0 \leq i < SymTrace.size - 2$ following the recursive call postcondition;
-        \item Trace[-1] = target $\in Post(\{Trace[-2]\})$, because target is obtained by PickOneState(SymTrace[-1]) and SymTrace[-1] $\subseteq$ Post(SymTrace[-2]).
+        \item for all the elements of $Trace$ except the last one, because of the recursive post-condition;
+        \item for the last element of $Trace$, namely $Target$, because it is obtained by \texttt{PickOneState} on $SymTrace'[-1]$ and $SymTrace'[-1] \subseteq Post(SymTrace'[-2])$ for the pre-condition.        
     \end{itemize}
+
+    Therefore, we can conclude that the algorithm that looks for the counterexample is correct.
+
+    \subsection{Inputs between states}
+    Additionally, the assignment required us to find a feasible input for each pair of consecutive states in the counterexample.
+    This can easily be achieved using the function \texttt{GetInputsBetweenStates} on each pair of consecutive states in the trace.
+
 \end{document}
