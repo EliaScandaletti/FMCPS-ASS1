@@ -289,12 +289,12 @@ end function
         \begin{enumerate}
             \item pick the last element \texttt{sym\_target} of the list and remove it from the list;
             \item choose a state \texttt{target} in \texttt{sym\_target};
-            \item reduce the last region in the list in such a way that \texttt{target} is reachable from each state in it in a single iteration;
+            \item reduce the last region in the list in such a way that \texttt{target} is reachable in a single iteration from each state in it;
             \item recursively invoke the procedure on the modified list and concatenate the result with \texttt{target}.
         \end{enumerate}
     \end{itemize}
     This algorithm grants that the states in the output list are always just one step apart, regardless of the state chosen in the last region of the list.
-    The procedure step in which the last element of the list is modified is needed in order to keep this property valid.
+    The third step in the recursive case is needed in order to keep this property valid.
     
     \begin{figure}[H] 
         \centering
@@ -335,7 +335,7 @@ end function
                 SymTrace[i] = R \wedge \exists\ SymTrace[i+1] \implies SymTrace[i+1] \subseteq Post(R)
             \end{cases}
         \end{equation}
-        \item Postcondition: The function returns a list of states $Trace$ that satisfies the following conditions:
+        \item Postcondition:\ the function returns a list of states $Trace$ that satisfies the following conditions:
         \begin{equation}
             \begin{cases}
                 SymTrace[i] = R \implies Trace[i] \in R \\
@@ -373,7 +373,7 @@ end function
     \end{minted}
 
     \noindent
-    $Target \in Post(\{s\}) \forall s \in SymTrace[-1]$ because of the properties of the $Pre$ function.
+    $\forall s \in SymTrace[-1], Target \in Post(\{s\})$ because of the properties of the $Pre$ function.
 
     \noindent
     The precondition of the recursive call is satisfied because:
@@ -387,7 +387,7 @@ end function
     \end{itemize}
 
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
- Trace |$\leftarrow$| CreateTrace(SymTrace)
+    Trace |$\leftarrow$| CreateTrace(SymTrace)
     \end{minted}
 
     \noindent
@@ -395,6 +395,7 @@ end function
     
     \begin{minted}[bgcolor=bg, breaklines, fontsize=\small, mathescape=true, escapeinside=||]{python}
     Trace |$\leftarrow$| Trace + Target
+    return Trace
     \end{minted}
 
     \noindent
@@ -419,6 +420,5 @@ end function
 
     \subsection{Inputs between states}
     Additionally, the assignment required us to find a feasible input for each pair of consecutive states in the counterexample.
-    This can easily be achieved using the function \texttt{GetInputsBetweenStates} on each pair of consecutive states in the trace.
-
+    This can be easily achieved using the function \texttt{GetInputsBetweenStates} on each pair of consecutive states in the trace.
 \end{document}
